@@ -123,10 +123,11 @@ local function showBuildingSparkle(position)
 	end)
 end
 
--- Income popup tracking (throttled)
+-- Income popup tracking (throttled, suppressed for first 8 seconds)
 local lastIncomePopupTime = 0
 local accumulatedIncome = 0
 local lastKnownCash = 0
+local gameStartTime = tick()
 local UpdateCash = Remotes:WaitForChild("UpdateCash", 15)
 
 -- Floating income indicator
@@ -246,7 +247,8 @@ UpdateCash.OnClientEvent:Connect(function(newCash)
 	if diff > 0 then
 		accumulatedIncome = accumulatedIncome + diff
 		local now = tick()
-		if now - lastIncomePopupTime >= 1 then
+		-- Suppress popups for first 8 seconds (avoid clutter on load)
+		if now - gameStartTime > 8 and now - lastIncomePopupTime >= 1 then
 			showIncomePopup(accumulatedIncome)
 			accumulatedIncome = 0
 			lastIncomePopupTime = now

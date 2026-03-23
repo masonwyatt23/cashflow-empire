@@ -59,12 +59,14 @@ local function checkAchievements(player)
 end
 
 -- Check periodically (catches totalEarned milestones)
+-- Initial delay prevents achievement spam on first load
 task.spawn(function()
+	task.wait(20) -- let players settle in before first check
 	while true do
-		task.wait(5)
 		for _, player in ipairs(Players:GetPlayers()) do
 			checkAchievements(player)
 		end
+		task.wait(10)
 	end
 end)
 

@@ -17,6 +17,7 @@ local PlayerGui = player:WaitForChild("PlayerGui")
 -- Tutorial state
 local tutorialStep = 0
 local tutorialActive = false
+_G.TutorialActive = false
 
 -- Create tutorial UI elements
 local screenGui = Instance.new("ScreenGui")
@@ -113,6 +114,7 @@ local function advanceTutorial()
 
 	if tutorialStep > #steps then
 		tutorialActive = false
+		_G.TutorialActive = false
 		hidePopup()
 		-- Mark tutorial complete
 		local TutorialComplete = Remotes:FindFirstChild("TutorialComplete")
@@ -156,6 +158,7 @@ task.spawn(function()
 	TutorialInfo.OnClientEvent:Connect(function(shouldShow)
 		if shouldShow then
 			tutorialActive = true
+			_G.TutorialActive = true
 			task.wait(2) -- let player land on plot first
 			advanceTutorial()
 		end

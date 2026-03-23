@@ -246,11 +246,13 @@ end
 DailyRewardInfo.OnClientEvent:Connect(function(info)
 	updateDailyUI(info)
 
-	-- Auto-show if claimable
+	-- Auto-show if claimable (delayed to avoid popup clutter on load)
 	if info.canClaim then
-		task.wait(0.5)
-		frame.Visible = true
-		overlay.Visible = true
+		task.wait(10) -- let player explore first
+		if not (_G.TutorialActive) then
+			frame.Visible = true
+			overlay.Visible = true
+		end
 	end
 end)
 
