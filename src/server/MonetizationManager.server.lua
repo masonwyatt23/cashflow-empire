@@ -119,7 +119,7 @@ local function processReceipt(receiptInfo)
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 
-	local data = _G.GetPlayerData(player)
+	local data = _G.GetPlayerData and _G.GetPlayerData(player)
 	if not data then
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end

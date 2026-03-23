@@ -168,14 +168,19 @@ task.spawn(function()
 			originalOnItemPurchased(player, itemIndex)
 		end
 		updateQuestProgress(player, "buy_items", 1)
-		updateQuestProgress(player, "reach_item", 0)
+		-- Update reach_item progress directly (uses item count, not delta)
 		local data = _G.GetPlayerData and _G.GetPlayerData(player)
 		if data and data.dailyQuests then
 			for _, quest in ipairs(data.dailyQuests) do
 				if quest.type == "reach_item" and not quest.claimed then
+					local prev = quest.progress
 					quest.progress = #data.ownedItems
+					if quest.progress >= quest.target and prev < quest.target then
+						QuestCompletedRemote:FireClient(player, quest.description, quest.reward)
+					end
 				end
 			end
+			sendQuestInfo(player)
 		end
 	end
 
