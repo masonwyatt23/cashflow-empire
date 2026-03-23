@@ -88,6 +88,9 @@ GameConfig.Codes = {
 	TYCOON  = 1000,
 	RICH    = 10000,
 	REBIRTH = 50000,
+	SPACE   = 25000,   -- Cross-promo: from Space Tycoon
+	EMPIRE  = 15000,   -- Social media code
+	FOLLOW  = 5000,    -- Group follow code
 }
 
 -- Daily reward amounts (scaled to new economy)
