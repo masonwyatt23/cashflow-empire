@@ -229,7 +229,7 @@ task.spawn(function()
 				local item = GameConfig.TycoonItems[nextIndex]
 				if item and data.cash >= item.cost then
 					-- VIP check
-					if item.vip and not _G.HasGamePass(player, "VIP") then
+					if item.vip and not (_G.HasGamePass and _G.HasGamePass(player, "VIP")) then
 						continue
 					end
 					-- Auto-purchase

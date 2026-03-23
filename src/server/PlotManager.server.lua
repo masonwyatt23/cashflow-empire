@@ -805,11 +805,11 @@ local function onPlayerRemoving(player)
 	plotData.buildings = {}
 
 	-- Reset pads
-	for _, pad in pairs(plotData.pads) do
+	for itemIndex, pad in pairs(plotData.pads) do
 		if pad then
 			pad.Transparency = 0
 			pad.CanCollide = true
-			local item = GameConfig.TycoonItems[_]
+			local item = GameConfig.TycoonItems[itemIndex]
 			if item and item.cost == 0 then
 				pad.Color = Color3.fromRGB(50, 200, 50)
 			else

@@ -10,9 +10,9 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local GamePassConfig = require(Shared:WaitForChild("GamePassConfig"))
 
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
-local PromptGamePass = Remotes:WaitForChild("PromptGamePass")
-local PromptProduct = Remotes:WaitForChild("PromptProduct")
-local GamePassStatus = Remotes:WaitForChild("GamePassStatus")
+local PromptGamePass = Remotes:WaitForChild("PromptGamePass", 15)
+local PromptProduct = Remotes:WaitForChild("PromptProduct", 15)
+local GamePassStatus = Remotes:WaitForChild("GamePassStatus", 15)
 
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")

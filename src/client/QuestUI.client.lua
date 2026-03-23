@@ -10,9 +10,9 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Utils = require(Shared:WaitForChild("Utils"))
 
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
-local QuestInfo = Remotes:WaitForChild("QuestInfo")
-local QuestCompleted = Remotes:WaitForChild("QuestCompleted")
-local ClaimQuestReward = Remotes:WaitForChild("ClaimQuestReward")
+local QuestInfo = Remotes:WaitForChild("QuestInfo", 15)
+local QuestCompleted = Remotes:WaitForChild("QuestCompleted", 15)
+local ClaimQuestReward = Remotes:WaitForChild("ClaimQuestReward", 15)
 
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")

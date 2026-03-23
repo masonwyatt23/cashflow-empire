@@ -129,11 +129,6 @@ task.spawn(function()
 	end
 end)
 
--- Start background music after a short delay
-task.delay(3, function()
-	playSound("BackgroundMusic")
-end)
-
 -- Hook into button clicks (global function for other UIs to call)
 _G.PlayButtonClick = function()
 	playSound("ButtonClick")

@@ -7,8 +7,8 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
-local RedeemCode = Remotes:WaitForChild("RedeemCode")
-local CodeResult = Remotes:WaitForChild("CodeResult")
+local RedeemCode = Remotes:WaitForChild("RedeemCode", 15)
+local CodeResult = Remotes:WaitForChild("CodeResult", 15)
 
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")

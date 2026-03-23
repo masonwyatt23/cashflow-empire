@@ -11,9 +11,9 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Utils = require(Shared:WaitForChild("Utils"))
 
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
-local ItemPurchased = Remotes:WaitForChild("ItemPurchased")
-local RebirthSuccess = Remotes:WaitForChild("RebirthSuccess")
-local BuildingAppeared = Remotes:WaitForChild("BuildingAppeared")
+local ItemPurchased = Remotes:WaitForChild("ItemPurchased", 15)
+local RebirthSuccess = Remotes:WaitForChild("RebirthSuccess", 15)
+local BuildingAppeared = Remotes:WaitForChild("BuildingAppeared", 15)
 
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
@@ -127,7 +127,7 @@ end
 local lastIncomePopupTime = 0
 local accumulatedIncome = 0
 local lastKnownCash = 0
-local UpdateCash = Remotes:WaitForChild("UpdateCash")
+local UpdateCash = Remotes:WaitForChild("UpdateCash", 15)
 
 -- Floating income indicator
 local function showIncomePopup(amount)
