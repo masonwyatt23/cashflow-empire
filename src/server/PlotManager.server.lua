@@ -30,11 +30,11 @@ local function getTier(itemIndex)
 end
 
 -- Helper: get grid position within a plot for item index
--- 3 rows x 5 columns layout
+-- 3 rows x 6 columns layout (supports up to 18 items including VIP)
 local function getItemPosition(itemIndex, plotCenter)
-	local col = math.ceil(itemIndex / 3)   -- 1-5
+	local col = math.ceil(itemIndex / 3)   -- 1-6
 	local row = ((itemIndex - 1) % 3) + 1  -- 1-3
-	local xOffset = (col - 3) * 14          -- -28, -14, 0, 14, 28
+	local xOffset = (col - 3.5) * 12        -- spreads evenly across plot
 	local zOffset = (row - 2) * 14          -- -14, 0, 14
 	return Vector3.new(
 		plotCenter.X + xOffset,

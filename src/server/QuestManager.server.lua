@@ -127,43 +127,66 @@ ClaimQuestRemote.OnServerEvent:Connect(function(player, questIndex)
 end)
 
 -- Hook into game events for progress tracking
--- Cash earned tracking
-local originalAddCash = _G.AddCash
-_G.AddCash = function(player, amount)
-	originalAddCash(player, amount)
-	if amount > 0 then
-		updateQuestProgress(player, "earn_cash", amount)
+-- Wait for _G functions to be registered by other scripts before wrapping
+task.spawn(function()
+	-- Wait for TycoonManager to register _G.AddCash
+	local elapsed = 0
+	while not _G.AddCash and elapsed < 30 do
+		task.wait(0.1)
+		elapsed = elapsed + 0.1
 	end
-end
 
--- Item purchased tracking
-local originalOnItemPurchased = _G.OnItemPurchased
-_G.OnItemPurchased = function(player, itemIndex)
-	if originalOnItemPurchased then
-		originalOnItemPurchased(player, itemIndex)
+	if not _G.AddCash then
+		warn("[QuestManager] _G.AddCash never registered, quest tracking disabled")
+		return
 	end
-	updateQuestProgress(player, "buy_items", 1)
-	updateQuestProgress(player, "reach_item", 0) -- check current count
-	-- Update reach_item progress to current item count
-	local data = _G.GetPlayerData and _G.GetPlayerData(player)
-	if data and data.dailyQuests then
-		for _, quest in ipairs(data.dailyQuests) do
-			if quest.type == "reach_item" and not quest.claimed then
-				quest.progress = #data.ownedItems
+
+	-- Cash earned tracking
+	local originalAddCash = _G.AddCash
+	_G.AddCash = function(player, amount)
+		originalAddCash(player, amount)
+		if amount > 0 then
+			updateQuestProgress(player, "earn_cash", amount)
+		end
+	end
+
+	-- Item purchased tracking (may or may not exist yet)
+	local originalOnItemPurchased = _G.OnItemPurchased
+	_G.OnItemPurchased = function(player, itemIndex)
+		if originalOnItemPurchased then
+			originalOnItemPurchased(player, itemIndex)
+		end
+		updateQuestProgress(player, "buy_items", 1)
+		updateQuestProgress(player, "reach_item", 0)
+		local data = _G.GetPlayerData and _G.GetPlayerData(player)
+		if data and data.dailyQuests then
+			for _, quest in ipairs(data.dailyQuests) do
+				if quest.type == "reach_item" and not quest.claimed then
+					quest.progress = #data.ownedItems
+				end
 			end
 		end
 	end
-end
 
--- Rebirth tracking
-local originalDoRebirth = _G.DoRebirth
-_G.DoRebirth = function(player, skipCostCheck)
-	local result = originalDoRebirth(player, skipCostCheck)
-	if result then
-		updateQuestProgress(player, "rebirth", 1)
+	-- Rebirth tracking
+	while not _G.DoRebirth and elapsed < 30 do
+		task.wait(0.1)
+		elapsed = elapsed + 0.1
 	end
-	return result
-end
+
+	if _G.DoRebirth then
+		local originalDoRebirth = _G.DoRebirth
+		_G.DoRebirth = function(player, skipCostCheck)
+			local result = originalDoRebirth(player, skipCostCheck)
+			if result then
+				updateQuestProgress(player, "rebirth", 1)
+			end
+			return result
+		end
+	end
+
+	print("[QuestManager] Event hooks registered")
+end)
 
 -- Player join
 Players.PlayerAdded:Connect(function(player)

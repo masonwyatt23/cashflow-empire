@@ -247,7 +247,7 @@ task.spawn(function()
 	end
 end)
 
--- Auto-purchase first item after player data loads
+-- Auto-purchase first item after player data AND PlotManager are ready
 Players.PlayerAdded:Connect(function(player)
 	task.spawn(function()
 		-- Wait for data to load
@@ -256,7 +256,13 @@ Players.PlayerAdded:Connect(function(player)
 			task.wait(0.5)
 			elapsed = elapsed + 0.5
 		end
-		task.wait(1) -- let plot assign
+		-- Wait for PlotManager to register its callback (not a fixed timer)
+		elapsed = 0
+		while not _G.OnItemPurchased and elapsed < 10 do
+			task.wait(0.5)
+			elapsed = elapsed + 0.5
+		end
+		task.wait(0.5) -- small buffer for plot to finish building
 		autoPurchaseFirstItem(player)
 	end)
 end)
