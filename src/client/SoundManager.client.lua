@@ -8,11 +8,11 @@ local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Remotes = ReplicatedStorage:WaitForChild("Remotes")
-local ItemPurchased = Remotes:WaitForChild("ItemPurchased")
-local RebirthSuccess = Remotes:WaitForChild("RebirthSuccess")
-local BuildingAppeared = Remotes:WaitForChild("BuildingAppeared")
-local UpdateCash = Remotes:WaitForChild("UpdateCash")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes", 15)
+local ItemPurchased = Remotes:WaitForChild("ItemPurchased", 15)
+local RebirthSuccess = Remotes:WaitForChild("RebirthSuccess", 15)
+local BuildingAppeared = Remotes:WaitForChild("BuildingAppeared", 15)
+local UpdateCash = Remotes:WaitForChild("UpdateCash", 15)
 
 local player = Players.LocalPlayer
 
