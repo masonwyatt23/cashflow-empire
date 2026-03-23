@@ -38,9 +38,8 @@ for i = 1, GameConfig.MaxPlots do
 	table.insert(AvailablePlots, i)
 end
 
--- Module references (set by DataManager)
-local DataManager = nil
-local MonetizationManager = nil
+-- Rate limiting
+local lastPurchaseTime = {} -- [player] = tick()
 
 -- Expose PlayerData for other server scripts
 _G.TycoonPlayerData = PlayerData
@@ -99,10 +98,15 @@ local function getNextItemIndex(player)
 	return #data.ownedItems + 1
 end
 
--- Handle item purchase
+-- Handle item purchase (from client UI button)
 local function onPurchaseItem(player, itemIndex)
 	local data = PlayerData[player]
 	if not data then return end
+
+	-- Rate limit (0.5s cooldown)
+	local now = tick()
+	if lastPurchaseTime[player] and (now - lastPurchaseTime[player]) < 0.5 then return end
+	lastPurchaseTime[player] = now
 
 	-- Validate: must be the next item in sequence
 	local nextIndex = getNextItemIndex(player)
@@ -123,6 +127,18 @@ local function onPurchaseItem(player, itemIndex)
 	UpdateCashRemote:FireClient(player, data.cash)
 	UpdateItemsRemote:FireClient(player, data.ownedItems)
 	ItemPurchasedRemote:FireClient(player, itemIndex, item.name)
+
+	-- Update leaderboard
+	local leaderstats = player:FindFirstChild("leaderstats")
+	if leaderstats then
+		local cashStat = leaderstats:FindFirstChild("Cash")
+		if cashStat then cashStat.Value = data.cash end
+	end
+
+	-- Notify PlotManager to show building
+	if _G.OnItemPurchased then
+		_G.OnItemPurchased(player, itemIndex)
+	end
 end
 
 -- Handle client data request
@@ -187,6 +203,7 @@ Players.PlayerRemoving:Connect(function(player)
 		table.sort(AvailablePlots)
 	end
 	PlayerPlots[player] = nil
+	lastPurchaseTime[player] = nil
 	-- PlayerData cleanup happens after DataManager saves
 	task.delay(5, function()
 		PlayerData[player] = nil

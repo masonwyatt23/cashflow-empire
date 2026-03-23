@@ -7,8 +7,12 @@
 local Players = game:GetService("Players")
 
 Players.PlayerAdded:Connect(function(player)
-	-- Wait for player data to be initialized
-	task.wait(2)
+	-- Wait for player data to actually be ready (not a fixed timer)
+	local elapsed = 0
+	while not (_G.GetPlayerData and _G.GetPlayerData(player)) and elapsed < 15 do
+		task.wait(0.5)
+		elapsed = elapsed + 0.5
+	end
 
 	-- Create leaderstats folder
 	local leaderstats = Instance.new("Folder")
@@ -26,7 +30,7 @@ Players.PlayerAdded:Connect(function(player)
 	rebirthStat.Parent = leaderstats
 
 	-- Set initial values from player data
-	local data = _G.GetPlayerData(player)
+	local data = _G.GetPlayerData and _G.GetPlayerData(player)
 	if data then
 		cashStat.Value = data.cash
 		rebirthStat.Value = data.rebirthCount

@@ -149,10 +149,23 @@ end
 
 MarketplaceService.ProcessReceipt = processReceipt
 
+-- Poll-wait for player data with timeout
+local function waitForPlayerData(player, timeout)
+	local elapsed = 0
+	while not _G.GetPlayerData(player) and elapsed < (timeout or 15) do
+		task.wait(0.5)
+		elapsed = elapsed + 0.5
+	end
+	return _G.GetPlayerData(player) ~= nil
+end
+
 -- Player joined — check passes
 Players.PlayerAdded:Connect(function(player)
-	-- Wait for data to be ready
-	task.wait(2)
+	-- Wait for data to actually be ready (not a fixed timer)
+	if not waitForPlayerData(player, 15) then
+		warn("[MonetizationManager] Timed out waiting for player data: " .. player.Name)
+		return
+	end
 	checkGamePasses(player)
 
 	-- Re-apply speed boost on respawn
@@ -172,7 +185,7 @@ end)
 -- Handle players already in game
 for _, player in ipairs(Players:GetPlayers()) do
 	task.spawn(function()
-		task.wait(2)
+		if not waitForPlayerData(player, 15) then return end
 		checkGamePasses(player)
 	end)
 end

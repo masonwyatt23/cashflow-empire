@@ -186,6 +186,40 @@ local function createHUD()
 	shopCorner.CornerRadius = UDim.new(0, 8)
 	shopCorner.Parent = shopButton
 
+	-- Codes button (next to shop)
+	local codesButton = Instance.new("TextButton")
+	codesButton.Name = "CodesButton"
+	codesButton.Size = UDim2.new(0, 100, 0, 45)
+	codesButton.Position = UDim2.new(0, 140, 1, -55)
+	codesButton.BackgroundColor3 = Color3.fromRGB(150, 80, 200)
+	codesButton.BorderSizePixel = 0
+	codesButton.Text = "CODES"
+	codesButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	codesButton.TextSize = 16
+	codesButton.Font = Enum.Font.GothamBold
+	codesButton.Parent = screenGui
+
+	local codesCorner = Instance.new("UICorner")
+	codesCorner.CornerRadius = UDim.new(0, 8)
+	codesCorner.Parent = codesButton
+
+	-- Daily reward button (next to codes)
+	local dailyButton = Instance.new("TextButton")
+	dailyButton.Name = "DailyButton"
+	dailyButton.Size = UDim2.new(0, 100, 0, 45)
+	dailyButton.Position = UDim2.new(0, 250, 1, -55)
+	dailyButton.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
+	dailyButton.BorderSizePixel = 0
+	dailyButton.Text = "DAILY"
+	dailyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	dailyButton.TextSize = 16
+	dailyButton.Font = Enum.Font.GothamBold
+	dailyButton.Parent = screenGui
+
+	local dailyCorner = Instance.new("UICorner")
+	dailyCorner.CornerRadius = UDim.new(0, 8)
+	dailyCorner.Parent = dailyButton
+
 	return screenGui
 end
 
@@ -305,6 +339,26 @@ hud.ShopButton.MouseButton1Click:Connect(function()
 		if frame then
 			frame.Visible = not frame.Visible
 		end
+	end
+end)
+
+-- Codes button
+hud.CodesButton.MouseButton1Click:Connect(function()
+	local codeGui = PlayerGui:FindFirstChild("CodeGUI")
+	if codeGui then
+		local frame = codeGui:FindFirstChild("CodeFrame")
+		if frame then
+			frame.Visible = not frame.Visible
+		end
+	elseif _G.ShowCodeUI then
+		_G.ShowCodeUI()
+	end
+end)
+
+-- Daily reward button
+hud.DailyButton.MouseButton1Click:Connect(function()
+	if _G.ShowDailyReward then
+		_G.ShowDailyReward()
 	end
 end)
 

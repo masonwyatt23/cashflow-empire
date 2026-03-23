@@ -13,6 +13,7 @@ local Utils = require(Shared:WaitForChild("Utils"))
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 local ItemPurchased = Remotes:WaitForChild("ItemPurchased")
 local RebirthSuccess = Remotes:WaitForChild("RebirthSuccess")
+local BuildingAppeared = Remotes:WaitForChild("BuildingAppeared")
 
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
@@ -90,9 +91,47 @@ local function showRebirthEffect()
 	end)
 end
 
+-- 3D sparkle effect at a world position (building appeared)
+local function showBuildingSparkle(position)
+	-- Create temporary part with particle emitter
+	local effectPart = Instance.new("Part")
+	effectPart.Size = Vector3.new(1, 1, 1)
+	effectPart.Position = position + Vector3.new(0, 5, 0)
+	effectPart.Anchored = true
+	effectPart.Transparency = 1
+	effectPart.CanCollide = false
+	effectPart.Parent = workspace
+
+	local particles = Instance.new("ParticleEmitter")
+	particles.Color = ColorSequence.new(Color3.fromRGB(255, 215, 0), Color3.fromRGB(255, 255, 200))
+	particles.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(1, 0),
+	})
+	particles.Lifetime = NumberRange.new(0.5, 1)
+	particles.Rate = 50
+	particles.Speed = NumberRange.new(5, 15)
+	particles.SpreadAngle = Vector2.new(180, 180)
+	particles.Parent = effectPart
+
+	-- Emit burst then cleanup
+	particles:Emit(30)
+	particles.Enabled = false
+
+	task.delay(2, function()
+		effectPart:Destroy()
+	end)
+end
+
 -- Event handlers
 ItemPurchased.OnClientEvent:Connect(function(itemIndex, itemName)
 	showFloatingText("Purchased: " .. itemName, Color3.fromRGB(100, 255, 100))
+end)
+
+BuildingAppeared.OnClientEvent:Connect(function(position)
+	if position then
+		showBuildingSparkle(position)
+	end
 end)
 
 RebirthSuccess.OnClientEvent:Connect(function(newCount)

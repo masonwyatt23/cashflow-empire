@@ -47,6 +47,37 @@ GameConfig.Rebirth = {
 -- Plot settings
 GameConfig.MaxPlots = 8
 GameConfig.PlotSpacing = 100     -- Studs between plot centers
+GameConfig.PlotSize = 80         -- Studs per plot platform (width and depth)
+
+-- Building appearance per tier (items 1-3 = tier 1, 4-6 = tier 2, etc.)
+GameConfig.BuildingColors = {
+	Color3.fromRGB(139, 195, 74),   -- Tier 1: Green
+	Color3.fromRGB(255, 183, 77),   -- Tier 2: Orange
+	Color3.fromRGB(100, 181, 246),  -- Tier 3: Blue
+	Color3.fromRGB(186, 104, 200),  -- Tier 4: Purple
+	Color3.fromRGB(255, 215, 0),    -- Tier 5: Gold
+}
+GameConfig.BuildingHeights = {4, 6, 10, 14, 20} -- studs tall per tier
+
+-- Plot base colors (one per plot)
+GameConfig.PlotColors = {
+	Color3.fromRGB(200, 230, 200),
+	Color3.fromRGB(200, 200, 230),
+	Color3.fromRGB(230, 200, 200),
+	Color3.fromRGB(200, 230, 230),
+	Color3.fromRGB(230, 230, 200),
+	Color3.fromRGB(220, 200, 230),
+	Color3.fromRGB(200, 220, 210),
+	Color3.fromRGB(225, 215, 200),
+}
+
+-- Promo codes: code -> cash reward
+GameConfig.Codes = {
+	LAUNCH  = 5000,
+	TYCOON  = 1000,
+	RICH    = 10000,
+	REBIRTH = 50000,
+}
 
 -- Daily reward amounts
 GameConfig.DailyRewards = {

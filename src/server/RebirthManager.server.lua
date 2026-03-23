@@ -13,6 +13,12 @@ local Utils = require(Shared:WaitForChild("Utils"))
 
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 
+-- Forward declarations
+local sendRebirthInfo
+
+-- Rate limiting
+local lastRebirthTime = {} -- [player] = tick()
+
 -- Create remotes
 local RebirthRemote = Instance.new("RemoteEvent")
 RebirthRemote.Name = "RequestRebirth"
@@ -69,12 +75,17 @@ function _G.DoRebirth(player, skipCostCheck)
 		if rebirthStat then rebirthStat.Value = data.rebirthCount end
 	end
 
+	-- Notify PlotManager to reset buildings
+	if _G.OnRebirth then
+		_G.OnRebirth(player)
+	end
+
 	print("[RebirthManager] " .. player.Name .. " rebirthed! Count: " .. data.rebirthCount)
 	return true
 end
 
 -- Send rebirth info to client (cost, current count, multiplier)
-function sendRebirthInfo(player)
+sendRebirthInfo = function(player)
 	local data = _G.GetPlayerData(player)
 	if not data then return end
 
@@ -91,9 +102,17 @@ function sendRebirthInfo(player)
 	})
 end
 
--- Handle rebirth request
+-- Handle rebirth request (with rate limiting)
 RebirthRemote.OnServerEvent:Connect(function(player)
+	local now = tick()
+	if lastRebirthTime[player] and (now - lastRebirthTime[player]) < 2 then return end
+	lastRebirthTime[player] = now
 	_G.DoRebirth(player, false)
+end)
+
+-- Cleanup rate limit on leave
+Players.PlayerRemoving:Connect(function(player)
+	lastRebirthTime[player] = nil
 end)
 
 -- Send rebirth info when requested and periodically

@@ -22,7 +22,18 @@ local DEFAULT_DATA = {
 	lastDaily = 0,
 	dailyStreak = 0,
 	tempBoostExpiry = 0,
+	redeemedCodes = {},
 }
+
+-- Poll-wait helper: waits for a _G function to be registered by another script
+local function waitForGlobal(name, timeout)
+	local elapsed = 0
+	while not _G[name] and elapsed < (timeout or 30) do
+		task.wait(0.1)
+		elapsed = elapsed + 0.1
+	end
+	return _G[name] ~= nil
+end
 
 -- Retry wrapper for DataStore operations
 local function retryAsync(func, ...)
@@ -91,11 +102,13 @@ end
 Players.PlayerAdded:Connect(function(player)
 	local data = loadPlayerData(player)
 
-	-- Initialize via TycoonManager
-	if _G.InitializePlayerData then
-		_G.InitializePlayerData(player, data)
+	-- Wait for TycoonManager to register its init function (handles script load order)
+	if not waitForGlobal("InitializePlayerData", 30) then
+		warn("[DataManager] Timed out waiting for InitializePlayerData for " .. player.Name)
+		return
 	end
 
+	_G.InitializePlayerData(player, data)
 	print("[DataManager] Loaded data for " .. player.Name)
 end)
 
@@ -132,9 +145,11 @@ end)
 for _, player in ipairs(Players:GetPlayers()) do
 	task.spawn(function()
 		local data = loadPlayerData(player)
-		if _G.InitializePlayerData then
-			_G.InitializePlayerData(player, data)
+		if not waitForGlobal("InitializePlayerData", 30) then
+			warn("[DataManager] Timed out waiting for InitializePlayerData for " .. player.Name)
+			return
 		end
+		_G.InitializePlayerData(player, data)
 	end)
 end
 
