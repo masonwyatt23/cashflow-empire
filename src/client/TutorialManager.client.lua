@@ -102,7 +102,7 @@ end
 
 -- Tutorial steps
 local steps = {
-	{text = "Welcome to Business Tycoon! Build your empire from scratch.", delay = 0},
+	{text = "Welcome to CashFlow Empire! Stack cash and build your empire!", delay = 0},
 	{text = "Step on the green pads to buy businesses! Your Lemonade Stand was purchased automatically.", delay = 2},
 	{text = "Watch your cash grow! Buy the next business when you can afford it.", waitForPurchase = true},
 	{text = "Great job! Keep buying businesses to increase your income. Check out the SHOP for boosts!", delay = 5},
