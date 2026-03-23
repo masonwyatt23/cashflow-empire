@@ -13,6 +13,8 @@ local AUTOSAVE_INTERVAL = 60 -- seconds
 local MAX_RETRIES = 3
 local RETRY_DELAY = 1 -- seconds
 
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+
 -- Default data template
 local DEFAULT_DATA = {
 	cash = 0,
@@ -23,6 +25,10 @@ local DEFAULT_DATA = {
 	dailyStreak = 0,
 	tempBoostExpiry = 0,
 	redeemedCodes = {},
+	tutorialComplete = false,
+	achievements = {},
+	dailyQuests = {},
+	lastQuestReset = 0,
 }
 
 -- Poll-wait helper: waits for a _G function to be registered by another script
@@ -152,5 +158,44 @@ for _, player in ipairs(Players:GetPlayers()) do
 		_G.InitializePlayerData(player, data)
 	end)
 end
+
+-- Tutorial remotes
+local TutorialInfoRemote = Instance.new("RemoteEvent")
+TutorialInfoRemote.Name = "TutorialInfo"
+TutorialInfoRemote.Parent = Remotes
+
+local TutorialCompleteRemote = Instance.new("RemoteEvent")
+TutorialCompleteRemote.Name = "TutorialComplete"
+TutorialCompleteRemote.Parent = Remotes
+
+TutorialCompleteRemote.OnServerEvent:Connect(function(player)
+	local data = _G.GetPlayerData and _G.GetPlayerData(player)
+	if data then
+		data.tutorialComplete = true
+	end
+end)
+
+-- Send tutorial status after data loads
+local function sendTutorialStatus(player)
+	local data = _G.GetPlayerData and _G.GetPlayerData(player)
+	if data and not data.tutorialComplete then
+		TutorialInfoRemote:FireClient(player, true)
+	end
+end
+
+-- Hook into PlayerAdded (after data is ready)
+task.spawn(function()
+	while true do
+		task.wait(5)
+		for _, player in ipairs(Players:GetPlayers()) do
+			-- Only send once, checked by client
+			local data = _G.GetPlayerData and _G.GetPlayerData(player)
+			if data and not data.tutorialComplete and not data._tutorialSent then
+				data._tutorialSent = true
+				sendTutorialStatus(player)
+			end
+		end
+	end
+end)
 
 print("[DataManager] Initialized")

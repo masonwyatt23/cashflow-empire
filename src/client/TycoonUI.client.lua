@@ -220,6 +220,58 @@ local function createHUD()
 	dailyCorner.CornerRadius = UDim.new(0, 8)
 	dailyCorner.Parent = dailyButton
 
+	-- Quests button
+	local questsButton = Instance.new("TextButton")
+	questsButton.Name = "QuestsButton"
+	questsButton.Size = UDim2.new(0, 100, 0, 45)
+	questsButton.Position = UDim2.new(0, 360, 1, -55)
+	questsButton.BackgroundColor3 = Color3.fromRGB(200, 100, 50)
+	questsButton.BorderSizePixel = 0
+	questsButton.Text = "QUESTS"
+	questsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	questsButton.TextSize = 16
+	questsButton.Font = Enum.Font.GothamBold
+	questsButton.Parent = screenGui
+
+	local questsCorner = Instance.new("UICorner")
+	questsCorner.CornerRadius = UDim.new(0, 8)
+	questsCorner.Parent = questsButton
+
+	-- Progress bar (below Next Item panel)
+	local progressFrame = Instance.new("Frame")
+	progressFrame.Name = "ProgressBar"
+	progressFrame.Size = UDim2.new(0, 300, 0, 18)
+	progressFrame.Position = UDim2.new(0.5, -150, 0, 195)
+	progressFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+	progressFrame.BorderSizePixel = 0
+	progressFrame.Parent = screenGui
+
+	local progressCorner = Instance.new("UICorner")
+	progressCorner.CornerRadius = UDim.new(0, 6)
+	progressCorner.Parent = progressFrame
+
+	local progressFill = Instance.new("Frame")
+	progressFill.Name = "Fill"
+	progressFill.Size = UDim2.new(0, 0, 1, 0)
+	progressFill.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+	progressFill.BorderSizePixel = 0
+	progressFill.Parent = progressFrame
+
+	local fillCorner = Instance.new("UICorner")
+	fillCorner.CornerRadius = UDim.new(0, 6)
+	fillCorner.Parent = progressFill
+
+	local progressText = Instance.new("TextLabel")
+	progressText.Name = "ProgressText"
+	progressText.Size = UDim2.new(1, 0, 1, 0)
+	progressText.BackgroundTransparency = 1
+	progressText.Text = ""
+	progressText.TextColor3 = Color3.fromRGB(255, 255, 255)
+	progressText.TextSize = 11
+	progressText.Font = Enum.Font.GothamBold
+	progressText.ZIndex = 2
+	progressText.Parent = progressFrame
+
 	return screenGui
 end
 
@@ -292,13 +344,7 @@ local function updateAll()
 	updateRebirthDisplay()
 end
 
--- Event handlers
-UpdateCash.OnClientEvent:Connect(function(cash)
-	currentCash = cash
-	updateCashDisplay()
-	updateNextItem()
-	updateRebirthDisplay()
-end)
+-- Event handlers (cash handler is below with progress bar)
 
 UpdateItems.OnClientEvent:Connect(function(items)
 	ownedItems = items
@@ -357,9 +403,75 @@ end)
 
 -- Daily reward button
 hud.DailyButton.MouseButton1Click:Connect(function()
+	if _G.PlayButtonClick then _G.PlayButtonClick() end
 	if _G.ShowDailyReward then
 		_G.ShowDailyReward()
 	end
+end)
+
+-- Quests button
+hud.QuestsButton.MouseButton1Click:Connect(function()
+	if _G.PlayButtonClick then _G.PlayButtonClick() end
+	local questGui = PlayerGui:FindFirstChild("QuestGUI")
+	if questGui then
+		local frame = questGui:FindFirstChild("QuestFrame")
+		if frame then
+			frame.Visible = not frame.Visible
+		end
+	elseif _G.ShowQuestUI then
+		_G.ShowQuestUI()
+	end
+end)
+
+-- Progress bar update
+local function updateProgressBar()
+	local nextIndex = #ownedItems + 1
+	local nextItem = GameConfig.TycoonItems[nextIndex]
+	local progressBar = hud.ProgressBar
+	local fill = progressBar and progressBar:FindFirstChild("Fill")
+	local text = progressBar and progressBar:FindFirstChild("ProgressText")
+
+	if not progressBar or not fill or not text then return end
+
+	if nextItem then
+		local pct = nextItem.cost > 0 and math.clamp(currentCash / nextItem.cost, 0, 1) or 1
+		fill.Size = UDim2.new(pct, 0, 1, 0)
+
+		-- Time estimate
+		local totalIncome = 0
+		for _, index in ipairs(ownedItems) do
+			local item = GameConfig.TycoonItems[index]
+			if item then totalIncome = totalIncome + item.income end
+		end
+		totalIncome = totalIncome * (rebirthData.currentMultiplier or 1)
+
+		local remaining = nextItem.cost - currentCash
+		if totalIncome > 0 and remaining > 0 then
+			local seconds = math.ceil(remaining / totalIncome)
+			if seconds < 60 then
+				text.Text = math.floor(pct * 100) .. "% — ~" .. seconds .. "s"
+			else
+				text.Text = math.floor(pct * 100) .. "% — ~" .. math.ceil(seconds / 60) .. "m"
+			end
+		elseif remaining <= 0 then
+			text.Text = "100% — Ready to buy!"
+		else
+			text.Text = math.floor(pct * 100) .. "%"
+		end
+	else
+		fill.Size = UDim2.new(1, 0, 1, 0)
+		text.Text = "All items purchased!"
+		fill.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+	end
+end
+
+-- Hook progress bar into cash updates
+UpdateCash.OnClientEvent:Connect(function(cash)
+	currentCash = cash
+	updateCashDisplay()
+	updateNextItem()
+	updateRebirthDisplay()
+	updateProgressBar()
 end)
 
 -- Request initial data

@@ -119,6 +119,9 @@ local function onPurchaseItem(player, itemIndex)
 	-- Validate: player has enough cash
 	if data.cash < item.cost then return end
 
+	-- Validate: VIP items require VIP pass
+	if item.vip and not (_G.HasGamePass and _G.HasGamePass(player, "VIP")) then return end
+
 	-- Deduct cash and add item
 	data.cash = data.cash - item.cost
 	table.insert(data.ownedItems, itemIndex)
@@ -191,9 +194,72 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 end)
 
+-- Expose purchase function for PlotManager to call directly
+_G.PurchaseTycoonItem = onPurchaseItem
+
 -- Connect events
 PurchaseItemRemote.OnServerEvent:Connect(onPurchaseItem)
 RequestDataRemote.OnServerEvent:Connect(onRequestData)
+
+-- Auto-purchase first item for new players
+local function autoPurchaseFirstItem(player)
+	if not GameConfig.AutoPurchaseFirstItem then return end
+	local data = PlayerData[player]
+	if not data then return end
+	if #data.ownedItems == 0 then
+		local item = GameConfig.TycoonItems[1]
+		if item and item.cost == 0 then
+			table.insert(data.ownedItems, 1)
+			UpdateItemsRemote:FireClient(player, data.ownedItems)
+			ItemPurchasedRemote:FireClient(player, 1, item.name)
+			if _G.OnItemPurchased then
+				_G.OnItemPurchased(player, 1)
+			end
+		end
+	end
+end
+
+-- Auto-buy system (AutoCollect pass = auto-purchases next affordable item)
+task.spawn(function()
+	while true do
+		task.wait(2) -- check every 2 seconds
+		for player, data in pairs(PlayerData) do
+			if player.Parent and _G.HasGamePass and _G.HasGamePass(player, "AutoCollect") then
+				local nextIndex = #data.ownedItems + 1
+				local item = GameConfig.TycoonItems[nextIndex]
+				if item and data.cash >= item.cost then
+					-- VIP check
+					if item.vip and not _G.HasGamePass(player, "VIP") then
+						continue
+					end
+					-- Auto-purchase
+					data.cash = data.cash - item.cost
+					table.insert(data.ownedItems, nextIndex)
+					UpdateCashRemote:FireClient(player, data.cash)
+					UpdateItemsRemote:FireClient(player, data.ownedItems)
+					ItemPurchasedRemote:FireClient(player, nextIndex, item.name)
+					if _G.OnItemPurchased then
+						_G.OnItemPurchased(player, nextIndex)
+					end
+				end
+			end
+		end
+	end
+end)
+
+-- Auto-purchase first item after player data loads
+Players.PlayerAdded:Connect(function(player)
+	task.spawn(function()
+		-- Wait for data to load
+		local elapsed = 0
+		while not PlayerData[player] and elapsed < 15 do
+			task.wait(0.5)
+			elapsed = elapsed + 0.5
+		end
+		task.wait(1) -- let plot assign
+		autoPurchaseFirstItem(player)
+	end)
+end)
 
 -- Player leaving — free up plot
 Players.PlayerRemoving:Connect(function(player)

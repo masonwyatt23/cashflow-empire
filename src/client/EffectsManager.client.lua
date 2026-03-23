@@ -123,6 +123,104 @@ local function showBuildingSparkle(position)
 	end)
 end
 
+-- Income popup tracking (throttled)
+local lastIncomePopupTime = 0
+local accumulatedIncome = 0
+local lastKnownCash = 0
+local UpdateCash = Remotes:WaitForChild("UpdateCash")
+
+-- Floating income indicator
+local function showIncomePopup(amount)
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(0, 200, 0, 30)
+	label.Position = UDim2.new(0.5, -100 + math.random(-30, 30), 0.15, 0)
+	label.BackgroundTransparency = 1
+	label.Text = "+$" .. Utils.formatCash(amount)
+	label.TextColor3 = Color3.fromRGB(100, 255, 100)
+	label.TextSize = 20
+	label.Font = Enum.Font.GothamBold
+	label.TextStrokeTransparency = 0.5
+	label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+	label.Parent = effectsGui
+
+	local tweenInfo = TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	TweenService:Create(label, tweenInfo, {
+		Position = label.Position + UDim2.new(0, 0, -0.03, 0),
+		TextTransparency = 1,
+		TextStrokeTransparency = 1,
+	}):Play()
+
+	task.delay(1, function() label:Destroy() end)
+end
+
+-- Achievement banner
+local function showAchievementBanner(name, reward)
+	local banner = Instance.new("Frame")
+	banner.Size = UDim2.new(0, 400, 0, 60)
+	banner.Position = UDim2.new(0.5, -200, 0, -60)
+	banner.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+	banner.BorderSizePixel = 0
+	banner.ZIndex = 50
+	banner.Parent = effectsGui
+
+	local bannerCorner = Instance.new("UICorner")
+	bannerCorner.CornerRadius = UDim.new(0, 10)
+	bannerCorner.Parent = banner
+
+	local bannerStroke = Instance.new("UIStroke")
+	bannerStroke.Color = Color3.fromRGB(255, 215, 0)
+	bannerStroke.Thickness = 2
+	bannerStroke.Parent = banner
+
+	local titleText = Instance.new("TextLabel")
+	titleText.Size = UDim2.new(1, -20, 0, 25)
+	titleText.Position = UDim2.new(0, 10, 0, 5)
+	titleText.BackgroundTransparency = 1
+	titleText.Text = "ACHIEVEMENT UNLOCKED"
+	titleText.TextColor3 = Color3.fromRGB(255, 215, 0)
+	titleText.TextSize = 14
+	titleText.Font = Enum.Font.GothamBold
+	titleText.TextXAlignment = Enum.TextXAlignment.Left
+	titleText.ZIndex = 51
+	titleText.Parent = banner
+
+	local nameText = Instance.new("TextLabel")
+	nameText.Size = UDim2.new(0.6, 0, 0, 25)
+	nameText.Position = UDim2.new(0, 10, 0, 30)
+	nameText.BackgroundTransparency = 1
+	nameText.Text = name
+	nameText.TextColor3 = Color3.fromRGB(255, 255, 255)
+	nameText.TextSize = 18
+	nameText.Font = Enum.Font.GothamBold
+	nameText.TextXAlignment = Enum.TextXAlignment.Left
+	nameText.ZIndex = 51
+	nameText.Parent = banner
+
+	local rewardText = Instance.new("TextLabel")
+	rewardText.Size = UDim2.new(0.35, 0, 0, 25)
+	rewardText.Position = UDim2.new(0.6, 0, 0, 30)
+	rewardText.BackgroundTransparency = 1
+	rewardText.Text = "+$" .. Utils.formatCash(reward)
+	rewardText.TextColor3 = Color3.fromRGB(100, 255, 100)
+	rewardText.TextSize = 16
+	rewardText.Font = Enum.Font.GothamBold
+	rewardText.TextXAlignment = Enum.TextXAlignment.Right
+	rewardText.ZIndex = 51
+	rewardText.Parent = banner
+
+	-- Slide in from top
+	local slideIn = TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+	TweenService:Create(banner, slideIn, {Position = UDim2.new(0.5, -200, 0, 10)}):Play()
+
+	-- Slide out after 4 seconds
+	task.delay(4, function()
+		local slideOut = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+		local tween = TweenService:Create(banner, slideOut, {Position = UDim2.new(0.5, -200, 0, -70)})
+		tween:Play()
+		tween.Completed:Connect(function() banner:Destroy() end)
+	end)
+end
+
 -- Event handlers
 ItemPurchased.OnClientEvent:Connect(function(itemIndex, itemName)
 	showFloatingText("Purchased: " .. itemName, Color3.fromRGB(100, 255, 100))
@@ -138,6 +236,44 @@ RebirthSuccess.OnClientEvent:Connect(function(newCount)
 	showRebirthEffect()
 	task.wait(0.5)
 	showFloatingText("Rebirth #" .. newCount .. "!", Color3.fromRGB(255, 100, 100))
+end)
+
+-- Income popup (throttled to 1/sec)
+UpdateCash.OnClientEvent:Connect(function(newCash)
+	local diff = newCash - lastKnownCash
+	lastKnownCash = newCash
+
+	if diff > 0 then
+		accumulatedIncome = accumulatedIncome + diff
+		local now = tick()
+		if now - lastIncomePopupTime >= 1 then
+			showIncomePopup(accumulatedIncome)
+			accumulatedIncome = 0
+			lastIncomePopupTime = now
+		end
+	end
+end)
+
+-- Achievement banner
+task.spawn(function()
+	local AchievementUnlocked = Remotes:WaitForChild("AchievementUnlocked", 10)
+	if AchievementUnlocked then
+		AchievementUnlocked.OnClientEvent:Connect(function(info)
+			if info then
+				showAchievementBanner(info.name, info.reward)
+			end
+		end)
+	end
+end)
+
+-- Quest completed notification
+task.spawn(function()
+	local QuestCompleted = Remotes:WaitForChild("QuestCompleted", 10)
+	if QuestCompleted then
+		QuestCompleted.OnClientEvent:Connect(function(description, reward)
+			showFloatingText("Quest Complete! +$" .. Utils.formatCash(reward), Color3.fromRGB(255, 180, 50))
+		end)
+	end
 end)
 
 print("[EffectsManager] Initialized")

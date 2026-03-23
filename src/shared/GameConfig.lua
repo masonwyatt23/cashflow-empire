@@ -2,47 +2,56 @@ local GameConfig = {}
 
 -- Currency
 GameConfig.CurrencyName = "Cash"
-GameConfig.StartingCash = 0
+GameConfig.StartingCash = 100
+GameConfig.AutoPurchaseFirstItem = true
 
 -- Income tick rate (seconds between income ticks)
 GameConfig.IncomeInterval = 1
 
--- Tycoon items — ordered unlock chain
--- Each item: {name, cost, incomePerSecond, description}
+-- Tycoon items — ordered unlock chain (rebalanced for snappy early game)
+-- Items 1-6 in ~1 min, all 15 in ~6 min, first rebirth at ~7 min
 GameConfig.TycoonItems = {
-	-- Tier 1: Starter (0-500 cash)
-	{name = "Lemonade Stand",     cost = 0,      income = 2,    description = "Your first business!"},
-	{name = "Newspaper Route",    cost = 50,     income = 5,    description = "Deliver the daily news"},
-	{name = "Hot Dog Cart",       cost = 150,    income = 10,   description = "Sizzling profits"},
+	-- Tier 1: Starter (instant to ~20s)
+	{name = "Lemonade Stand",     cost = 0,      income = 5,    description = "Your first business!"},
+	{name = "Newspaper Route",    cost = 25,     income = 8,    description = "Deliver the daily news"},
+	{name = "Hot Dog Cart",       cost = 75,     income = 15,   description = "Sizzling profits"},
 
-	-- Tier 2: Small Business (500-5,000 cash)
-	{name = "Coffee Shop",        cost = 500,    income = 25,   description = "Caffeine empire begins"},
-	{name = "Pizza Place",        cost = 1500,   income = 50,   description = "Everybody loves pizza"},
-	{name = "Car Wash",           cost = 3000,   income = 80,   description = "Squeaky clean money"},
+	-- Tier 2: Small Business (20s-60s each)
+	{name = "Coffee Shop",        cost = 200,    income = 30,   description = "Caffeine empire begins"},
+	{name = "Pizza Place",        cost = 500,    income = 50,   description = "Everybody loves pizza"},
+	{name = "Car Wash",           cost = 1200,   income = 80,   description = "Squeaky clean money"},
 
-	-- Tier 3: Growing Empire (5,000-50,000 cash)
-	{name = "Gas Station",        cost = 7000,   income = 150,  description = "Fuel your fortune"},
-	{name = "Grocery Store",      cost = 15000,  income = 300,  description = "Stock up on profits"},
-	{name = "Movie Theater",      cost = 30000,  income = 500,  description = "Blockbuster earnings"},
+	-- Tier 3: Growing Empire (15s-25s each)
+	{name = "Gas Station",        cost = 3000,   income = 150,  description = "Fuel your fortune"},
+	{name = "Grocery Store",      cost = 7500,   income = 300,  description = "Stock up on profits"},
+	{name = "Movie Theater",      cost = 18000,  income = 500,  description = "Blockbuster earnings"},
 
-	-- Tier 4: Big Business (50,000-500,000 cash)
-	{name = "Hotel",              cost = 60000,  income = 900,  description = "Five star income"},
-	{name = "Shopping Mall",      cost = 150000, income = 2000, description = "Retail domination"},
-	{name = "Airport",            cost = 350000, income = 4000, description = "Sky-high revenue"},
+	-- Tier 4: Big Business (30s-45s each)
+	{name = "Hotel",              cost = 40000,  income = 900,  description = "Five star income"},
+	{name = "Shopping Mall",      cost = 100000, income = 2000, description = "Retail domination"},
+	{name = "Airport",            cost = 250000, income = 4000, description = "Sky-high revenue"},
 
-	-- Tier 5: Mega Corp (500,000+)
-	{name = "Space Center",       cost = 700000,  income = 8000,  description = "To the moon!"},
-	{name = "Mega Factory",       cost = 1500000, income = 15000, description = "Industrial powerhouse"},
-	{name = "Golden Skyscraper",  cost = 5000000, income = 35000, description = "The ultimate tycoon"},
+	-- Tier 5: Mega Corp (42s-66s each)
+	{name = "Space Center",       cost = 500000,  income = 8000,  description = "To the moon!"},
+	{name = "Mega Factory",       cost = 1200000, income = 15000, description = "Industrial powerhouse"},
+	{name = "Golden Skyscraper",  cost = 3500000, income = 35000, description = "The ultimate tycoon"},
+
+	-- Tier 6: VIP Exclusive (requires VIP game pass)
+	{name = "VIP Penthouse",      cost = 8000000,  income = 50000,  description = "Luxury living", vip = true},
+	{name = "VIP Casino",         cost = 15000000, income = 80000,  description = "High roller profits", vip = true},
+	{name = "VIP Space Station",  cost = 30000000, income = 150000, description = "Orbital empire", vip = true},
 }
 
 -- Rebirth system
 GameConfig.Rebirth = {
-	baseCost = 1000000,          -- Cash required for first rebirth
+	baseCost = 500000,           -- Cash required for first rebirth (reachable in ~7 min)
 	costMultiplier = 2.5,        -- Each rebirth costs 2.5x more
 	incomeMultiplier = 1.5,      -- Each rebirth gives 1.5x income boost
-	maxRebirths = 50,
+	maxRebirths = 25,            -- Capped to prevent number overflow
 }
+
+-- Number of standard (non-VIP) items
+GameConfig.StandardItemCount = 15
 
 -- Plot settings
 GameConfig.MaxPlots = 8
@@ -56,8 +65,10 @@ GameConfig.BuildingColors = {
 	Color3.fromRGB(100, 181, 246),  -- Tier 3: Blue
 	Color3.fromRGB(186, 104, 200),  -- Tier 4: Purple
 	Color3.fromRGB(255, 215, 0),    -- Tier 5: Gold
+	Color3.fromRGB(255, 100, 100),  -- Tier 6: VIP Red-Gold
 }
-GameConfig.BuildingHeights = {4, 6, 10, 14, 20} -- studs tall per tier
+GameConfig.BuildingHeights = {4, 6, 10, 14, 20, 25} -- studs tall per tier
+GameConfig.BuildingMaterials = {"Wood", "Brick", "Concrete", "Metal", "Neon", "ForceField"} -- per tier
 
 -- Plot base colors (one per plot)
 GameConfig.PlotColors = {
@@ -79,15 +90,35 @@ GameConfig.Codes = {
 	REBIRTH = 50000,
 }
 
--- Daily reward amounts
+-- Daily reward amounts (scaled to new economy)
 GameConfig.DailyRewards = {
-	100,    -- Day 1
-	250,    -- Day 2
-	500,    -- Day 3
-	1000,   -- Day 4
-	2500,   -- Day 5
-	5000,   -- Day 6
-	10000,  -- Day 7 (weekly bonus)
+	500,     -- Day 1
+	1500,    -- Day 2
+	5000,    -- Day 3
+	15000,   -- Day 4
+	50000,   -- Day 5
+	150000,  -- Day 6
+	500000,  -- Day 7 (weekly bonus)
+}
+
+-- Quest definitions (pool for daily quests)
+GameConfig.QuestPool = {
+	{type = "earn_cash",   description = "Earn $%s cash",        baseTarget = 50000,  rewardMult = 2},
+	{type = "buy_items",   description = "Buy %s items",         baseTarget = 3,      rewardMult = 3},
+	{type = "rebirth",     description = "Rebirth %s time(s)",   baseTarget = 1,      rewardMult = 5},
+	{type = "play_time",   description = "Play for %s minutes",  baseTarget = 10,     rewardMult = 2},
+	{type = "reach_item",  description = "Reach item #%s",       baseTarget = 10,     rewardMult = 3},
+}
+
+-- Achievements
+GameConfig.Achievements = {
+	{id = "first_business",  name = "First Business",   trigger = "items",      threshold = 1,       reward = 500},
+	{id = "entrepreneur",    name = "Entrepreneur",     trigger = "items",      threshold = 5,       reward = 5000},
+	{id = "mogul",           name = "Mogul",            trigger = "items",      threshold = 15,      reward = 50000},
+	{id = "first_rebirth",   name = "First Rebirth",    trigger = "rebirths",   threshold = 1,       reward = 10000},
+	{id = "veteran",         name = "Veteran",          trigger = "rebirths",   threshold = 5,       reward = 100000},
+	{id = "millionaire",     name = "Millionaire",      trigger = "totalEarned", threshold = 1000000, reward = 50000},
+	{id = "ten_million",     name = "10 Million Club",  trigger = "totalEarned", threshold = 10000000, reward = 500000},
 }
 
 return GameConfig

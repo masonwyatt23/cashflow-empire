@@ -66,8 +66,8 @@ local function createLobby()
 	base.Size = Vector3.new(200, 1, 120)
 	base.Position = Vector3.new(0, -0.5, 0)
 	base.Anchored = true
-	base.Color = Color3.fromRGB(120, 120, 120)
-	base.Material = Enum.Material.SmoothPlastic
+	base.Color = Color3.fromRGB(80, 160, 80)
+	base.Material = Enum.Material.Grass
 	base.Parent = lobbyFolder
 
 	-- Title sign
@@ -130,6 +130,95 @@ local function createLobby()
 		defaultBase:Destroy()
 	end
 
+	-- === ATMOSPHERE ===
+
+	-- Lighting
+	local Lighting = game:GetService("Lighting")
+	Lighting.ClockTime = 14
+	Lighting.Ambient = Color3.fromRGB(140, 140, 140)
+	Lighting.OutdoorAmbient = Color3.fromRGB(180, 180, 200)
+	Lighting.Brightness = 2
+	Lighting.ColorShift_Top = Color3.fromRGB(255, 245, 230)
+
+	-- Sky
+	local sky = Instance.new("Sky")
+	sky.SkyboxBk = "rbxassetid://6444884337"
+	sky.SkyboxDn = "rbxassetid://6444884337"
+	sky.SkyboxFt = "rbxassetid://6444884337"
+	sky.SkyboxLf = "rbxassetid://6444884337"
+	sky.SkyboxRt = "rbxassetid://6444884337"
+	sky.SkyboxUp = "rbxassetid://6444884337"
+	sky.StarCount = 3000
+	sky.Parent = Lighting
+
+	-- Atmosphere (depth haze)
+	local atmosphere = Instance.new("Atmosphere")
+	atmosphere.Density = 0.3
+	atmosphere.Offset = 0.25
+	atmosphere.Color = Color3.fromRGB(200, 220, 255)
+	atmosphere.Decay = Color3.fromRGB(100, 140, 180)
+	atmosphere.Glare = 0
+	atmosphere.Haze = 1
+	atmosphere.Parent = Lighting
+
+	-- Bloom effect
+	local bloom = Instance.new("BloomEffect")
+	bloom.Intensity = 0.3
+	bloom.Size = 20
+	bloom.Threshold = 1.2
+	bloom.Parent = Lighting
+
+	-- Lobby lamp posts
+	for _, pos in ipairs({
+		Vector3.new(-40, 0, -20), Vector3.new(40, 0, -20),
+		Vector3.new(-40, 0, 40), Vector3.new(40, 0, 40),
+	}) do
+		local pole = Instance.new("Part")
+		pole.Size = Vector3.new(1, 12, 1)
+		pole.Position = pos + Vector3.new(0, 6, 0)
+		pole.Anchored = true
+		pole.Color = Color3.fromRGB(60, 60, 60)
+		pole.Material = Enum.Material.Metal
+		pole.Parent = lobbyFolder
+
+		local lamp = Instance.new("Part")
+		lamp.Size = Vector3.new(3, 1, 3)
+		lamp.Position = pos + Vector3.new(0, 12.5, 0)
+		lamp.Anchored = true
+		lamp.Color = Color3.fromRGB(255, 240, 200)
+		lamp.Material = Enum.Material.Neon
+		lamp.Shape = Enum.PartType.Ball
+		lamp.Parent = lobbyFolder
+
+		local light = Instance.new("PointLight")
+		light.Color = Color3.fromRGB(255, 240, 200)
+		light.Brightness = 1
+		light.Range = 30
+		light.Parent = lamp
+	end
+
+	-- Fountain centerpiece
+	local fountain = Instance.new("Part")
+	fountain.Shape = Enum.PartType.Cylinder
+	fountain.Size = Vector3.new(2, 12, 12)
+	fountain.CFrame = CFrame.new(0, 1, 15) * CFrame.Angles(0, 0, math.rad(90))
+	fountain.Anchored = true
+	fountain.Color = Color3.fromRGB(180, 180, 190)
+	fountain.Material = Enum.Material.Marble
+	fountain.Parent = lobbyFolder
+
+	local waterEffect = Instance.new("ParticleEmitter")
+	waterEffect.Color = ColorSequence.new(Color3.fromRGB(150, 200, 255))
+	waterEffect.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.3),
+		NumberSequenceKeypoint.new(1, 0),
+	})
+	waterEffect.Lifetime = NumberRange.new(0.5, 1.5)
+	waterEffect.Rate = 30
+	waterEffect.Speed = NumberRange.new(5, 10)
+	waterEffect.SpreadAngle = Vector2.new(30, 30)
+	waterEffect.Parent = fountain
+
 	return lobbyFolder
 end
 
@@ -178,13 +267,14 @@ local function createPurchasePad(plotNum, itemIndex, position)
 	nameLabel.Parent = billboard
 
 	local costText = item.cost == 0 and "FREE" or ("$" .. Utils.formatCash(item.cost))
+	if item.vip then costText = "VIP - " .. costText end
 	local costLabel = Instance.new("TextLabel")
 	costLabel.Name = "Cost"
 	costLabel.Size = UDim2.new(1, 0, 0.35, 0)
 	costLabel.Position = UDim2.new(0, 0, 0.4, 0)
 	costLabel.BackgroundTransparency = 1
 	costLabel.Text = costText
-	costLabel.TextColor3 = item.cost == 0 and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 215, 0)
+	costLabel.TextColor3 = item.vip and Color3.fromRGB(255, 100, 100) or (item.cost == 0 and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 215, 0))
 	costLabel.TextScaled = true
 	costLabel.Font = Enum.Font.GothamBold
 	costLabel.TextStrokeTransparency = 0.5
@@ -202,7 +292,7 @@ local function createPurchasePad(plotNum, itemIndex, position)
 	hintLabel.TextStrokeTransparency = 0.5
 	hintLabel.Parent = billboard
 
-	-- Touch handler (server-side, calls purchase logic directly)
+	-- Touch handler — delegates to TycoonManager (single source of truth)
 	pad.Touched:Connect(function(hit)
 		local character = hit.Parent
 		if not character then return end
@@ -218,44 +308,9 @@ local function createPurchasePad(plotNum, itemIndex, position)
 		touchDebounce[key] = true
 		task.delay(0.5, function() touchDebounce[key] = nil end)
 
-		-- Fire purchase through TycoonManager's remote
-		local PurchaseItemRemote = Remotes:FindFirstChild("PurchaseItem")
-		if PurchaseItemRemote then
-			PurchaseItemRemote:FireServer(itemIndex) -- Won't work from server; use _G directly
-		end
-
-		-- Direct server-side purchase attempt via existing system
-		-- TycoonManager validates everything
-		local data = _G.GetPlayerData and _G.GetPlayerData(player)
-		if not data then return end
-
-		local nextIndex = #data.ownedItems + 1
-		if itemIndex ~= nextIndex then return end
-		if data.cash < item.cost then return end
-
-		-- Deduct cash and add item
-		data.cash = data.cash - item.cost
-		table.insert(data.ownedItems, itemIndex)
-
-		-- Notify systems
-		local UpdateCashRemote = Remotes:FindFirstChild("UpdateCash")
-		local UpdateItemsRemote = Remotes:FindFirstChild("UpdateItems")
-		local ItemPurchasedRemote = Remotes:FindFirstChild("ItemPurchased")
-
-		if UpdateCashRemote then UpdateCashRemote:FireClient(player, data.cash) end
-		if UpdateItemsRemote then UpdateItemsRemote:FireClient(player, data.ownedItems) end
-		if ItemPurchasedRemote then ItemPurchasedRemote:FireClient(player, itemIndex, item.name) end
-
-		-- Update leaderboard
-		local leaderstats = player:FindFirstChild("leaderstats")
-		if leaderstats then
-			local cashStat = leaderstats:FindFirstChild("Cash")
-			if cashStat then cashStat.Value = data.cash end
-		end
-
-		-- Trigger building appearance
-		if _G.OnItemPurchased then
-			_G.OnItemPurchased(player, itemIndex)
+		-- Delegate to TycoonManager's purchase handler (validates everything)
+		if _G.PurchaseTycoonItem then
+			_G.PurchaseTycoonItem(player, itemIndex)
 		end
 	end)
 
@@ -272,23 +327,68 @@ local function createBuilding(plotNum, itemIndex, position)
 	local tier = getTier(itemIndex)
 	local height = GameConfig.BuildingHeights[tier] or 6
 	local color = GameConfig.BuildingColors[tier] or Color3.fromRGB(200, 200, 200)
+	local matName = GameConfig.BuildingMaterials[tier] or "SmoothPlastic"
+	local material = Enum.Material[matName] or Enum.Material.SmoothPlastic
 
-	local building = Instance.new("Part")
-	building.Name = "Building_" .. itemIndex
-	building.Size = Vector3.new(8, height, 8)
-	building.Position = Vector3.new(position.X, position.Y + height / 2, position.Z)
-	building.Anchored = true
-	building.Color = color
-	building.Material = Enum.Material.SmoothPlastic
-	building.CanCollide = true
+	local plotFolder = workspace:FindFirstChild("Plot_" .. plotNum) or workspace
 
-	-- Building name label
+	-- Multi-part building: base + tower + roof
+	local model = Instance.new("Model")
+	model.Name = "Building_" .. itemIndex
+	model.Parent = plotFolder
+
+	-- Base (wider)
+	local basePart = Instance.new("Part")
+	basePart.Name = "Base"
+	basePart.Size = Vector3.new(10, 2, 10)
+	basePart.Position = Vector3.new(position.X, position.Y + 1, position.Z)
+	basePart.Anchored = true
+	basePart.Color = color
+	basePart.Material = material
+	basePart.Parent = model
+
+	-- Tower (main body)
+	local tower = Instance.new("Part")
+	tower.Name = "Tower"
+	tower.Size = Vector3.new(8, height - 3, 8)
+	tower.Position = Vector3.new(position.X, position.Y + 2 + (height - 3) / 2, position.Z)
+	tower.Anchored = true
+	tower.Color = color
+	tower.Material = material
+	tower.Parent = model
+
+	-- Roof (flat top or pyramid for small buildings)
+	local roof = Instance.new("Part")
+	roof.Name = "Roof"
+	if tier <= 2 then
+		-- Small buildings: pyramid roof (wedge approximation)
+		roof.Size = Vector3.new(9, 2, 9)
+		roof.Position = Vector3.new(position.X, position.Y + height - 0.5, position.Z)
+		roof.Color = Color3.fromRGB(math.min(255, color.R * 255 * 0.7), math.min(255, color.G * 255 * 0.7), math.min(255, color.B * 255 * 0.7))
+	else
+		-- Big buildings: flat roof with overhang
+		roof.Size = Vector3.new(10, 0.5, 10)
+		roof.Position = Vector3.new(position.X, position.Y + height - 0.75, position.Z)
+		roof.Color = Color3.fromRGB(50, 50, 60)
+	end
+	roof.Anchored = true
+	roof.Material = material
+	roof.Parent = model
+
+	-- Interior glow
+	local glow = Instance.new("PointLight")
+	glow.Color = color
+	glow.Brightness = 0.5
+	glow.Range = 15
+	glow.Parent = tower
+
+	-- Building name label (on top)
 	local billboard = Instance.new("BillboardGui")
 	billboard.Name = "BuildingInfo"
 	billboard.Size = UDim2.new(0, 180, 0, 40)
-	billboard.StudsOffset = Vector3.new(0, height / 2 + 2, 0)
+	billboard.StudsOffset = Vector3.new(0, height / 2 + 4, 0)
 	billboard.AlwaysOnTop = false
-	billboard.Parent = building
+	billboard.Parent = tower
 
 	local nameLabel = Instance.new("TextLabel")
 	nameLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -300,20 +400,35 @@ local function createBuilding(plotNum, itemIndex, position)
 	nameLabel.TextStrokeTransparency = 0.3
 	nameLabel.Parent = billboard
 
-	-- Pop-in animation: start small, scale up
-	building.Size = Vector3.new(0.5, 0.5, 0.5)
-	building.Position = Vector3.new(position.X, position.Y + 0.25, position.Z)
+	-- Pop-in animation on the tower (most visible part)
+	tower.Size = Vector3.new(0.5, 0.5, 0.5)
+	tower.Position = Vector3.new(position.X, position.Y + 2, position.Z)
+	basePart.Size = Vector3.new(0.5, 0.5, 0.5)
+	basePart.Position = Vector3.new(position.X, position.Y + 0.25, position.Z)
+	roof.Transparency = 1
 
 	local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-	local tween = TweenService:Create(building, tweenInfo, {
-		Size = Vector3.new(8, height, 8),
-		Position = Vector3.new(position.X, position.Y + height / 2, position.Z),
-	})
+	TweenService:Create(basePart, tweenInfo, {
+		Size = Vector3.new(10, 2, 10),
+		Position = Vector3.new(position.X, position.Y + 1, position.Z),
+	}):Play()
+	TweenService:Create(tower, tweenInfo, {
+		Size = Vector3.new(8, height - 3, 8),
+		Position = Vector3.new(position.X, position.Y + 2 + (height - 3) / 2, position.Z),
+	}):Play()
 
-	building.Parent = workspace:FindFirstChild("Plot_" .. plotNum) or workspace
-	tween:Play()
+	task.delay(0.4, function()
+		if tier <= 2 then
+			roof.Size = Vector3.new(9, 2, 9)
+			roof.Position = Vector3.new(position.X, position.Y + height - 0.5, position.Z)
+		else
+			roof.Size = Vector3.new(10, 0.5, 10)
+			roof.Position = Vector3.new(position.X, position.Y + height - 0.75, position.Z)
+		end
+		roof.Transparency = 0
+	end)
 
-	return building
+	return model
 end
 
 ------------------------------------------------------------------------
@@ -335,7 +450,7 @@ local function createPlot(plotNum)
 	base.Position = Vector3.new(center.X, -0.5, center.Z)
 	base.Anchored = true
 	base.Color = plotColor
-	base.Material = Enum.Material.SmoothPlastic
+	base.Material = Enum.Material.Grass
 	base.Parent = plotFolder
 
 	-- Plot border (thin raised edge)
@@ -408,6 +523,59 @@ local function createPlot(plotNum)
 			pad.Parent = plotFolder
 			pads[i] = pad
 		end
+	end
+
+	-- Decorative trees (2 per plot, in corners)
+	local half = plotSize / 2
+	for _, treePos in ipairs({
+		Vector3.new(center.X - half + 5, 0, center.Z + half - 5),
+		Vector3.new(center.X + half - 5, 0, center.Z + half - 5),
+	}) do
+		local trunk = Instance.new("Part")
+		trunk.Size = Vector3.new(1.5, 8, 1.5)
+		trunk.Position = treePos + Vector3.new(0, 4, 0)
+		trunk.Anchored = true
+		trunk.Color = Color3.fromRGB(120, 80, 40)
+		trunk.Material = Enum.Material.Wood
+		trunk.Parent = plotFolder
+
+		local canopy = Instance.new("Part")
+		canopy.Shape = Enum.PartType.Ball
+		canopy.Size = Vector3.new(8, 8, 8)
+		canopy.Position = treePos + Vector3.new(0, 10, 0)
+		canopy.Anchored = true
+		canopy.Color = Color3.fromRGB(50, 140, 50)
+		canopy.Material = Enum.Material.Grass
+		canopy.Parent = plotFolder
+	end
+
+	-- Lamp posts (2 per plot, front corners)
+	for _, lampPos in ipairs({
+		Vector3.new(center.X - half + 3, 0, center.Z - half + 3),
+		Vector3.new(center.X + half - 3, 0, center.Z - half + 3),
+	}) do
+		local pole = Instance.new("Part")
+		pole.Size = Vector3.new(0.8, 10, 0.8)
+		pole.Position = lampPos + Vector3.new(0, 5, 0)
+		pole.Anchored = true
+		pole.Color = Color3.fromRGB(60, 60, 60)
+		pole.Material = Enum.Material.Metal
+		pole.Parent = plotFolder
+
+		local bulb = Instance.new("Part")
+		bulb.Shape = Enum.PartType.Ball
+		bulb.Size = Vector3.new(2, 2, 2)
+		bulb.Position = lampPos + Vector3.new(0, 10.5, 0)
+		bulb.Anchored = true
+		bulb.Color = Color3.fromRGB(255, 240, 200)
+		bulb.Material = Enum.Material.Neon
+		bulb.Parent = plotFolder
+
+		local light = Instance.new("PointLight")
+		light.Color = Color3.fromRGB(255, 240, 200)
+		light.Brightness = 0.8
+		light.Range = 25
+		light.Parent = bulb
 	end
 
 	PlotModels[plotNum] = {
