@@ -137,7 +137,7 @@ local function createLobby()
 	Lighting.ClockTime = 14
 	Lighting.Ambient = Color3.fromRGB(140, 140, 140)
 	Lighting.OutdoorAmbient = Color3.fromRGB(180, 180, 200)
-	Lighting.Brightness = 2
+	Lighting.Brightness = 1.5
 	Lighting.ColorShift_Top = Color3.fromRGB(255, 245, 230)
 
 	-- Sky
@@ -197,27 +197,37 @@ local function createLobby()
 		light.Parent = lamp
 	end
 
-	-- Fountain centerpiece
-	local fountain = Instance.new("Part")
-	fountain.Shape = Enum.PartType.Cylinder
-	fountain.Size = Vector3.new(2, 12, 12)
-	fountain.CFrame = CFrame.new(0, 1, 15) * CFrame.Angles(0, 0, math.rad(90))
-	fountain.Anchored = true
-	fountain.Color = Color3.fromRGB(180, 180, 190)
-	fountain.Material = Enum.Material.Marble
-	fountain.Parent = lobbyFolder
+	-- Fountain centerpiece (basin + water column)
+	local basin = Instance.new("Part")
+	basin.Name = "FountainBasin"
+	basin.Size = Vector3.new(12, 2, 12)
+	basin.Position = Vector3.new(0, 1, 15)
+	basin.Anchored = true
+	basin.Color = Color3.fromRGB(180, 180, 190)
+	basin.Material = Enum.Material.Marble
+	basin.Parent = lobbyFolder
+
+	local column = Instance.new("Part")
+	column.Name = "FountainColumn"
+	column.Size = Vector3.new(2, 6, 2)
+	column.Position = Vector3.new(0, 5, 15)
+	column.Anchored = true
+	column.Color = Color3.fromRGB(200, 200, 210)
+	column.Material = Enum.Material.Marble
+	column.Parent = lobbyFolder
 
 	local waterEffect = Instance.new("ParticleEmitter")
 	waterEffect.Color = ColorSequence.new(Color3.fromRGB(150, 200, 255))
 	waterEffect.Size = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.3),
+		NumberSequenceKeypoint.new(0, 0.5),
 		NumberSequenceKeypoint.new(1, 0),
 	})
-	waterEffect.Lifetime = NumberRange.new(0.5, 1.5)
-	waterEffect.Rate = 30
-	waterEffect.Speed = NumberRange.new(5, 10)
-	waterEffect.SpreadAngle = Vector2.new(30, 30)
-	waterEffect.Parent = fountain
+	waterEffect.Lifetime = NumberRange.new(0.8, 1.5)
+	waterEffect.Rate = 40
+	waterEffect.Speed = NumberRange.new(3, 8)
+	waterEffect.SpreadAngle = Vector2.new(45, 45)
+	waterEffect.Drag = 2
+	waterEffect.Parent = column
 
 	return lobbyFolder
 end
@@ -307,6 +317,15 @@ local function createPurchasePad(plotNum, itemIndex, position)
 		if touchDebounce[key] then return end
 		touchDebounce[key] = true
 		task.delay(0.5, function() touchDebounce[key] = nil end)
+
+		-- Visual feedback — flash pad white briefly
+		local originalColor = pad.Color
+		pad.Color = Color3.fromRGB(255, 255, 255)
+		task.delay(0.15, function()
+			if pad and pad.Parent then
+				pad.Color = originalColor
+			end
+		end)
 
 		-- Delegate to TycoonManager's purchase handler (validates everything)
 		if _G.PurchaseTycoonItem then

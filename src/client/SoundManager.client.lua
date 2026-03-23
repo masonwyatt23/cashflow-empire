@@ -30,16 +30,16 @@ local function createSound(name, assetId, volume, looped)
 	return sound
 end
 
--- Create all sounds
-createSound("Purchase",      9125402735, 0.4)   -- Coin/cash register
-createSound("BuildingPop",   9125786857, 0.3)   -- Pop sound
-createSound("Rebirth",       9125516068, 0.6)   -- Epic fanfare
-createSound("Milestone",     9125402735, 0.5)   -- Celebration
-createSound("ButtonClick",   9114074523, 0.2)   -- UI click
-createSound("DailyReward",   9125402735, 0.5)   -- Reward jingle
-createSound("CodeSuccess",   9125402735, 0.4)   -- Success ding
-createSound("Achievement",   9125516068, 0.5)   -- Achievement unlock
-createSound("BackgroundMusic", 9043887091, 0.15, true)  -- Ambient loop
+-- Create all sounds (using verified Roblox default audio assets)
+createSound("Purchase",      138677306, 0.4)     -- Coin collect
+createSound("BuildingPop",   138677306, 0.3)     -- Same coin (pop feel)
+createSound("Rebirth",       138677306, 0.7)     -- Louder coin for fanfare
+createSound("Milestone",     138677306, 0.5)     -- Celebration
+createSound("ButtonClick",   138677306, 0.15)    -- Soft click
+createSound("DailyReward",   138677306, 0.5)     -- Reward jingle
+createSound("CodeSuccess",   138677306, 0.4)     -- Success ding
+createSound("Achievement",   138677306, 0.6)     -- Achievement unlock
+-- No background music for now (needs a verified looping track)
 
 -- Play a sound by name
 local function playSound(name)

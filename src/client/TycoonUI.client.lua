@@ -40,7 +40,7 @@ local function createHUD()
 	-- Main frame (top center)
 	local mainFrame = Instance.new("Frame")
 	mainFrame.Name = "MainPanel"
-	mainFrame.Size = UDim2.new(0, 320, 0, 120)
+	mainFrame.Size = UDim2.new(0, 320, 0, 140)
 	mainFrame.Position = UDim2.new(0.5, -160, 0, 10)
 	mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 	mainFrame.BackgroundTransparency = 0.15
@@ -108,6 +108,19 @@ local function createHUD()
 	rebirthLabel.Font = Enum.Font.Gotham
 	rebirthLabel.TextXAlignment = Enum.TextXAlignment.Right
 	rebirthLabel.Parent = mainFrame
+
+	-- Items counter
+	local itemsLabel = Instance.new("TextLabel")
+	itemsLabel.Name = "ItemsLabel"
+	itemsLabel.Size = UDim2.new(1, -20, 0, 20)
+	itemsLabel.Position = UDim2.new(0, 10, 0, 92)
+	itemsLabel.BackgroundTransparency = 1
+	itemsLabel.Text = "Items: 0/18"
+	itemsLabel.TextColor3 = Color3.fromRGB(200, 220, 255)
+	itemsLabel.TextSize = 13
+	itemsLabel.Font = Enum.Font.Gotham
+	itemsLabel.TextXAlignment = Enum.TextXAlignment.Center
+	itemsLabel.Parent = mainFrame
 
 	-- Next item info (bottom center)
 	local nextFrame = Instance.new("Frame")
@@ -241,7 +254,7 @@ local function createHUD()
 	local progressFrame = Instance.new("Frame")
 	progressFrame.Name = "ProgressBar"
 	progressFrame.Size = UDim2.new(0, 300, 0, 18)
-	progressFrame.Position = UDim2.new(0.5, -150, 0, 195)
+	progressFrame.Position = UDim2.new(0.5, -150, 0, 245)
 	progressFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
 	progressFrame.BorderSizePixel = 0
 	progressFrame.Parent = screenGui
@@ -350,6 +363,11 @@ UpdateItems.OnClientEvent:Connect(function(items)
 	ownedItems = items
 	updateIncomeDisplay()
 	updateNextItem()
+	-- Update items counter
+	local itemsLabel = hud.MainPanel:FindFirstChild("ItemsLabel")
+	if itemsLabel then
+		itemsLabel.Text = "Items: " .. #ownedItems .. "/" .. #GameConfig.TycoonItems
+	end
 end)
 
 RebirthInfo.OnClientEvent:Connect(function(info)

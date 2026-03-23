@@ -104,7 +104,7 @@ local function createDailyUI()
 
 	-- Create 7 day boxes
 	local dayBoxes = {}
-	local defaultRewards = {100, 250, 500, 1000, 2500, 5000, 10000}
+	local defaultRewards = {500, 1500, 5000, 15000, 50000, 150000, 500000}
 
 	for i = 1, 7 do
 		local box = Instance.new("Frame")
