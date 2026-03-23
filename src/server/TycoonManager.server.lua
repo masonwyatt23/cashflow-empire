@@ -238,6 +238,12 @@ task.spawn(function()
 					UpdateCashRemote:FireClient(player, data.cash)
 					UpdateItemsRemote:FireClient(player, data.ownedItems)
 					ItemPurchasedRemote:FireClient(player, nextIndex, item.name)
+					-- Update leaderboard
+					local leaderstats = player:FindFirstChild("leaderstats")
+					if leaderstats then
+						local cashStat = leaderstats:FindFirstChild("Cash")
+						if cashStat then cashStat.Value = data.cash end
+					end
 					if _G.OnItemPurchased then
 						_G.OnItemPurchased(player, nextIndex)
 					end

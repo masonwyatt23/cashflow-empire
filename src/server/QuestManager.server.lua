@@ -48,6 +48,10 @@ local function generateQuests(rebirthCount)
 		local template = pool[indices[i]]
 		local scaleFactor = 1 + (rebirthCount or 0) * 0.5
 		local target = math.floor(template.baseTarget * scaleFactor)
+		-- Cap reach_item at max items to prevent impossible quests
+		if template.type == "reach_item" then
+			target = math.min(target, #GameConfig.TycoonItems)
+		end
 		local reward = math.floor(target * template.rewardMult)
 
 		table.insert(quests, {
@@ -150,7 +154,14 @@ task.spawn(function()
 		end
 	end
 
-	-- Item purchased tracking (may or may not exist yet)
+	-- Wait for PlotManager to register OnItemPurchased before wrapping
+	elapsed = 0
+	while not _G.OnItemPurchased and elapsed < 30 do
+		task.wait(0.1)
+		elapsed = elapsed + 0.1
+	end
+
+	-- Item purchased tracking
 	local originalOnItemPurchased = _G.OnItemPurchased
 	_G.OnItemPurchased = function(player, itemIndex)
 		if originalOnItemPurchased then
@@ -169,6 +180,7 @@ task.spawn(function()
 	end
 
 	-- Rebirth tracking
+	elapsed = 0
 	while not _G.DoRebirth and elapsed < 30 do
 		task.wait(0.1)
 		elapsed = elapsed + 0.1

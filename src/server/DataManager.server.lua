@@ -14,6 +14,9 @@ local AUTOSAVE_INTERVAL = 60 -- seconds
 local MAX_RETRIES = 3
 local RETRY_DELAY = 1 -- seconds
 
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Utils = require(Shared:WaitForChild("Utils"))
+
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 
 -- Default data template
@@ -81,7 +84,7 @@ local function loadPlayerData(player)
 	end
 
 	-- New player or load failed — use defaults
-	return table.clone(DEFAULT_DATA)
+	return Utils.deepCopy(DEFAULT_DATA)
 end
 
 -- Save player data
@@ -137,15 +140,11 @@ task.spawn(function()
 	end
 end)
 
--- Save all on server shutdown
+-- Save all on server shutdown (sequential, Roblox gives 30s)
 game:BindToClose(function()
 	for _, player in ipairs(Players:GetPlayers()) do
-		task.spawn(function()
-			savePlayerData(player)
-		end)
+		savePlayerData(player)
 	end
-	-- Give time for saves to complete
-	task.wait(3)
 end)
 
 -- Handle players already in game (Studio testing)

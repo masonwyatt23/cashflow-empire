@@ -129,7 +129,11 @@ local function processReceipt(receiptInfo)
 		if productInfo.id == receiptInfo.ProductId then
 
 			if productKey == "SmallCashPack" or productKey == "LargeCashPack" then
-				_G.AddCash(player, productInfo.cashAmount)
+				if _G.AddCash then
+					_G.AddCash(player, productInfo.cashAmount)
+				else
+					return Enum.ProductPurchaseDecision.NotProcessedYet
+				end
 
 			elseif productKey == "InstantRebirth" then
 				if _G.DoRebirth then
