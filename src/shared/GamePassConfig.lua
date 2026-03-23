@@ -1,29 +1,28 @@
 local GamePassConfig = {}
 
--- Game Passes (one-time purchases)
--- Replace IDs with real ones after creating them in Creator Dashboard
+-- Game Passes (one-time purchases) — IDs from Creator Dashboard
 GamePassConfig.Passes = {
 	DoubleIncome = {
-		id = 0,  -- REPLACE with real GamePass ID
+		id = 1763821311,
 		name = "2x Income",
-		price = 199, -- Robux
+		price = 199,
 		description = "Permanently double all your income!",
 		multiplier = 2,
 	},
 	AutoCollect = {
-		id = 0,  -- REPLACE with real GamePass ID
-		name = "Auto-Collect",
+		id = 1764121270,
+		name = "Auto-Buy",
 		price = 149,
-		description = "Automatically collect income — no clicking needed!",
+		description = "Automatically buy the next business as soon as you can afford it!",
 	},
 	VIP = {
-		id = 0,  -- REPLACE with real GamePass ID
+		id = 1764375227,
 		name = "VIP",
 		price = 399,
-		description = "Exclusive VIP buildings + VIP badge!",
+		description = "Unlock 3 exclusive VIP-only buildings with massive income!",
 	},
 	SpeedBoost = {
-		id = 0,  -- REPLACE with real GamePass ID
+		id = 1764083338,
 		name = "Speed Boost",
 		price = 99,
 		description = "Walk 1.5x faster!",
@@ -31,34 +30,33 @@ GamePassConfig.Passes = {
 	},
 }
 
--- Developer Products (repeatable purchases)
--- Replace IDs with real ones after creating them in Creator Dashboard
+-- Developer Products (repeatable purchases) — IDs from Creator Dashboard
 GamePassConfig.Products = {
 	SmallCashPack = {
-		id = 0,  -- REPLACE with real Product ID
+		id = 3561886274,
 		name = "Small Cash Pack",
 		price = 49,
 		cashAmount = 10000,
 		description = "+10,000 Cash",
 	},
 	LargeCashPack = {
-		id = 0,  -- REPLACE with real Product ID
+		id = 3561887725,
 		name = "Large Cash Pack",
 		price = 199,
 		cashAmount = 50000,
 		description = "+50,000 Cash",
 	},
 	InstantRebirth = {
-		id = 0,  -- REPLACE with real Product ID
+		id = 3561888981,
 		name = "Instant Rebirth",
 		price = 99,
 		description = "Rebirth without meeting the cash requirement!",
 	},
 	TemporaryBoost = {
-		id = 0,  -- REPLACE with real Product ID
+		id = 3561890167,
 		name = "5min 2x Boost",
 		price = 29,
-		duration = 300, -- seconds
+		duration = 300,
 		multiplier = 2,
 		description = "2x income for 5 minutes!",
 	},
