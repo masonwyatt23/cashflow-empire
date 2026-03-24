@@ -106,7 +106,9 @@ local steps = {
 	{text = "Step on the green pads to buy businesses! Your Lemonade Stand was purchased automatically.", delay = 2},
 	{text = "Watch your cash grow! Buy the next business when you can afford it.", waitForPurchase = true},
 	{text = "Great job! Keep buying businesses to increase your income. Check out the SHOP for boosts!", delay = 5},
-	{text = "When you've earned enough, hit REBIRTH to reset and earn even faster!", delay = 6},
+	{text = "Try the INVEST button to trade stocks and earn extra cash! Buy low, sell high!", delay = 6},
+	{text = "Use CODES to get free cash! Try: LAUNCH, TYCOON, RICH. Check DAILY rewards too!", delay = 7},
+	{text = "When you've earned enough, hit REBIRTH to reset and earn even faster! 30+ buildings to unlock!", delay = 8},
 }
 
 local function advanceTutorial()

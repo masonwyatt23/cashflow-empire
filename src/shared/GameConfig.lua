@@ -164,6 +164,19 @@ GameConfig.Achievements = {
 	{id = "millionaire",     name = "Millionaire",      trigger = "totalEarned", threshold = 1000000, reward = 50000},
 	{id = "ten_million",     name = "10 Million Club",  trigger = "totalEarned", threshold = 10000000, reward = 500000},
 	{id = "stock_trader",    name = "Stock Trader",     trigger = "stockProfit", threshold = 50000,    reward = 25000},
+
+	-- Building milestones for expanded content
+	{id = "mega_corp",     name = "Mega Corporation", trigger = "items",      threshold = 20,       reward = 200000},
+	{id = "planetary",     name = "Planetary Scale",  trigger = "items",      threshold = 25,       reward = 500000},
+	{id = "cosmic_ruler",  name = "Cosmic Ruler",     trigger = "items",      threshold = 28,       reward = 1000000},
+
+	-- Rebirth milestones
+	{id = "rebirth_10",    name = "Prestige Master",  trigger = "rebirths",   threshold = 10,       reward = 500000},
+	{id = "rebirth_25",    name = "Rebirth Legend",    trigger = "rebirths",   threshold = 25,       reward = 5000000},
+
+	-- Wealth milestones
+	{id = "hundred_mil",   name = "100 Million Club",  trigger = "totalEarned", threshold = 100000000,  reward = 5000000},
+	{id = "billionaire",   name = "Billionaire",       trigger = "totalEarned", threshold = 1000000000, reward = 50000000},
 }
 
 return GameConfig

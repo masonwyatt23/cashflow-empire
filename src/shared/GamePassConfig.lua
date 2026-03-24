@@ -28,6 +28,12 @@ GamePassConfig.Passes = {
 		description = "Walk 1.5x faster!",
 		speedMultiplier = 1.5,
 	},
+	InsiderTrading = {
+		id = 1766154917,
+		name = "Insider Trading",
+		price = 149,
+		description = "See the next Market Event 30 seconds early!",
+	},
 }
 
 -- Developer Products (repeatable purchases) — IDs from Creator Dashboard
