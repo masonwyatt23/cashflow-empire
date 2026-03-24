@@ -36,10 +36,32 @@ GameConfig.TycoonItems = {
 	{name = "Mega Factory",       cost = 1200000, income = 15000, description = "Industrial powerhouse"},
 	{name = "Golden Skyscraper",  cost = 3500000, income = 35000, description = "The ultimate tycoon"},
 
-	-- Tier 6: VIP Exclusive (requires VIP game pass)
-	{name = "VIP Penthouse",      cost = 8000000,  income = 50000,  description = "Luxury living", vip = true},
-	{name = "VIP Casino",         cost = 15000000, income = 80000,  description = "High roller profits", vip = true},
-	{name = "VIP Space Station",  cost = 30000000, income = 150000, description = "Orbital empire", vip = true},
+	-- Tier 6: Mega Corp
+	{name = "Theme Park",         cost = 5000000,   income = 75000,   description = "Thrills and bills"},
+	{name = "Cruise Line",        cost = 12000000,  income = 120000,  description = "Sail into profit"},
+	{name = "Tech Campus",        cost = 25000000,  income = 200000,  description = "Silicon Valley vibes"},
+
+	-- Tier 7: Global Empire
+	{name = "Oil Rig",            cost = 50000000,  income = 350000,  description = "Black gold rush"},
+	{name = "Diamond Mine",       cost = 100000000, income = 600000,  description = "Diamonds are forever"},
+	{name = "Rocket Factory",     cost = 200000000, income = 1000000, description = "Launch your fortune"},
+
+	-- Tier 8: Planetary Scale
+	{name = "Moon Base",          cost = 500000000,  income = 1800000, description = "Lunar real estate"},
+	{name = "Mars Colony",        cost = 1000000000, income = 3000000, description = "Red planet profits"},
+	{name = "Quantum Lab",        cost = 2000000000, income = 5000000, description = "Infinite possibilities"},
+
+	-- Tier 9: Cosmic (unlocks after 5 rebirths)
+	{name = "Dyson Sphere",       cost = 5000000000,  income = 10000000,  description = "Harness a star"},
+	{name = "Galaxy HQ",          cost = 10000000000, income = 18000000,  description = "Intergalactic HQ"},
+
+	-- Tier 10: Secret (unlocks after 10 rebirths)
+	{name = "The Multiverse",     cost = 25000000000, income = 50000000,  description = "Reality is yours", secret = true},
+
+	-- VIP Exclusive (requires VIP game pass)
+	{name = "VIP Penthouse",      cost = 50000000000,  income = 80000000,  description = "Luxury living", vip = true},
+	{name = "VIP Casino",         cost = 100000000000, income = 150000000, description = "High roller profits", vip = true},
+	{name = "VIP Space Station",  cost = 250000000000, income = 300000000, description = "Orbital empire", vip = true},
 }
 
 -- Rebirth system
@@ -51,7 +73,7 @@ GameConfig.Rebirth = {
 }
 
 -- Number of standard (non-VIP) items
-GameConfig.StandardItemCount = 15
+GameConfig.StandardItemCount = 28
 
 -- Plot settings
 GameConfig.MaxPlots = 8
@@ -65,10 +87,15 @@ GameConfig.BuildingColors = {
 	Color3.fromRGB(100, 181, 246),  -- Tier 3: Blue
 	Color3.fromRGB(186, 104, 200),  -- Tier 4: Purple
 	Color3.fromRGB(255, 215, 0),    -- Tier 5: Gold
-	Color3.fromRGB(255, 100, 100),  -- Tier 6: VIP Red-Gold
+	Color3.fromRGB(255, 100, 50),   -- Tier 6: Mega Corp Orange-Red
+	Color3.fromRGB(50, 200, 255),   -- Tier 7: Global Empire Cyan
+	Color3.fromRGB(200, 50, 255),   -- Tier 8: Planetary Purple
+	Color3.fromRGB(255, 255, 255),  -- Tier 9: Cosmic White
+	Color3.fromRGB(255, 50, 200),   -- Tier 10: Secret Pink
+	Color3.fromRGB(255, 100, 100),  -- VIP Red-Gold
 }
-GameConfig.BuildingHeights = {4, 6, 10, 14, 20, 25} -- studs tall per tier
-GameConfig.BuildingMaterials = {"Wood", "Brick", "Concrete", "Metal", "Neon", "ForceField"} -- per tier
+GameConfig.BuildingHeights = {4, 6, 10, 14, 20, 25, 30, 35, 40, 45, 50}
+GameConfig.BuildingMaterials = {"Wood", "Brick", "Concrete", "Metal", "Neon", "ForceField", "DiamondPlate", "Glass", "Neon", "ForceField", "ForceField"}
 
 -- Plot base colors (one per plot)
 GameConfig.PlotColors = {
@@ -91,6 +118,9 @@ GameConfig.Codes = {
 	SPACE   = 25000,   -- Cross-promo: from Space Tycoon
 	EMPIRE  = 15000,   -- Social media code
 	FOLLOW  = 5000,    -- Group follow code
+	GALAXY  = 25000,   -- Cross-promo: play Galaxy Empire
+	FOODIE  = 25000,   -- Cross-promo: play Food Factory
+	TOWER   = 25000,   -- Cross-promo: play Tower of Chaos
 }
 
 -- Daily reward amounts (scaled to new economy)
@@ -104,13 +134,24 @@ GameConfig.DailyRewards = {
 	500000,  -- Day 7 (weekly bonus)
 }
 
+-- Stock market configuration
+GameConfig.Stocks = {
+	{id = "lemonco",    name = "LemonCo",         basePrice = 50,   volatility = 0.08},
+	{id = "pizzacorp",  name = "PizzaCorp",       basePrice = 100,  volatility = 0.06},
+	{id = "techstart",  name = "TechStart",       basePrice = 200,  volatility = 0.10},
+	{id = "skyhigh",    name = "SkyHigh Airlines", basePrice = 500,  volatility = 0.07},
+	{id = "goldmine",   name = "GoldMine Inc",    basePrice = 1000, volatility = 0.05},
+	{id = "megacorp",   name = "MegaCorp",        basePrice = 5000, volatility = 0.04},
+}
+
 -- Quest definitions (pool for daily quests)
 GameConfig.QuestPool = {
-	{type = "earn_cash",   description = "Earn $%s cash",        baseTarget = 50000,  rewardMult = 2},
-	{type = "buy_items",   description = "Buy %s items",         baseTarget = 3,      rewardMult = 3},
-	{type = "rebirth",     description = "Rebirth %s time(s)",   baseTarget = 1,      rewardMult = 5},
-	{type = "play_time",   description = "Play for %s minutes",  baseTarget = 10,     rewardMult = 2},
-	{type = "reach_item",  description = "Reach item #%s",       baseTarget = 10,     rewardMult = 3},
+	{type = "earn_cash",     description = "Earn $%s cash",          baseTarget = 50000,  rewardMult = 2},
+	{type = "buy_items",     description = "Buy %s items",           baseTarget = 3,      rewardMult = 3},
+	{type = "rebirth",       description = "Rebirth %s time(s)",     baseTarget = 1,      rewardMult = 5},
+	{type = "play_time",     description = "Play for %s minutes",    baseTarget = 10,     rewardMult = 2},
+	{type = "reach_item",    description = "Reach item #%s",         baseTarget = 10,     rewardMult = 3},
+	{type = "stock_profit",  description = "Earn $%s from stocks",   baseTarget = 10000,  rewardMult = 2},
 }
 
 -- Achievements
@@ -122,6 +163,7 @@ GameConfig.Achievements = {
 	{id = "veteran",         name = "Veteran",          trigger = "rebirths",   threshold = 5,       reward = 100000},
 	{id = "millionaire",     name = "Millionaire",      trigger = "totalEarned", threshold = 1000000, reward = 50000},
 	{id = "ten_million",     name = "10 Million Club",  trigger = "totalEarned", threshold = 10000000, reward = 500000},
+	{id = "stock_trader",    name = "Stock Trader",     trigger = "stockProfit", threshold = 50000,    reward = 25000},
 }
 
 return GameConfig

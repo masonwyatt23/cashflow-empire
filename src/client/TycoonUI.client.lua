@@ -250,6 +250,40 @@ local function createHUD()
 	questsCorner.CornerRadius = UDim.new(0, 8)
 	questsCorner.Parent = questsButton
 
+	-- Invest button (next to quests)
+	local investButton = Instance.new("TextButton")
+	investButton.Name = "InvestButton"
+	investButton.Size = UDim2.new(0, 100, 0, 45)
+	investButton.Position = UDim2.new(0, 470, 1, -55)
+	investButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+	investButton.BorderSizePixel = 0
+	investButton.Text = "INVEST"
+	investButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	investButton.TextSize = 16
+	investButton.Font = Enum.Font.GothamBold
+	investButton.Parent = screenGui
+
+	local investCorner = Instance.new("UICorner")
+	investCorner.CornerRadius = UDim.new(0, 8)
+	investCorner.Parent = investButton
+
+	-- Trade button
+	local tradeButton = Instance.new("TextButton")
+	tradeButton.Name = "TradeButton"
+	tradeButton.Size = UDim2.new(0, 100, 0, 45)
+	tradeButton.Position = UDim2.new(0, 580, 1, -55)
+	tradeButton.BackgroundColor3 = Color3.fromRGB(50, 150, 150)
+	tradeButton.BorderSizePixel = 0
+	tradeButton.Text = "TRADE"
+	tradeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	tradeButton.TextSize = 16
+	tradeButton.Font = Enum.Font.GothamBold
+	tradeButton.Parent = screenGui
+
+	local tradeCorner = Instance.new("UICorner")
+	tradeCorner.CornerRadius = UDim.new(0, 8)
+	tradeCorner.Parent = tradeButton
+
 	-- Progress bar (below Next Item panel)
 	local progressFrame = Instance.new("Frame")
 	progressFrame.Name = "ProgressBar"
@@ -438,6 +472,22 @@ hud.QuestsButton.MouseButton1Click:Connect(function()
 		end
 	elseif _G.ShowQuestUI then
 		_G.ShowQuestUI()
+	end
+end)
+
+-- Invest button
+hud.InvestButton.MouseButton1Click:Connect(function()
+	if _G.PlayButtonClick then _G.PlayButtonClick() end
+	if _G.ShowInvestUI then
+		_G.ShowInvestUI()
+	end
+end)
+
+-- Trade button
+hud.TradeButton.MouseButton1Click:Connect(function()
+	if _G.PlayButtonClick then _G.PlayButtonClick() end
+	if _G.ShowTradeUI then
+		_G.ShowTradeUI()
 	end
 end)
 

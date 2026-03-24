@@ -37,6 +37,8 @@ local function checkAchievements(player)
 			earned = data.rebirthCount >= achievement.threshold
 		elseif achievement.trigger == "totalEarned" then
 			earned = data.totalEarned >= achievement.threshold
+		elseif achievement.trigger == "stockProfit" then
+			earned = (data.totalStockProfit or 0) >= achievement.threshold
 		end
 
 		if earned then
