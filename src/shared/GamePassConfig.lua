@@ -67,7 +67,7 @@ GamePassConfig.Products = {
 		description = "2x income for 5 minutes!",
 	},
 	StarterBundle = {
-		id = 0, -- CREATE IN CREATOR DASHBOARD: "Starter Bundle" R$99
+		id = 3562478511,
 		name = "Starter Bundle",
 		price = 99,
 		cashAmount = 50000,
