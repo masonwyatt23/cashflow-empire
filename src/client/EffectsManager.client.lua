@@ -307,6 +307,79 @@ UpdateCash.OnClientEvent:Connect(function(newCash)
 	end
 end)
 
+-- Rebirth milestone celebration
+task.spawn(function()
+	local RebirthMilestone = Remotes:WaitForChild("RebirthMilestone", 10)
+	if RebirthMilestone then
+		RebirthMilestone.OnClientEvent:Connect(function(milestoneName, bonus, count)
+			-- Full-screen golden flash
+			local flash = Instance.new("Frame")
+			flash.Size = UDim2.new(1, 0, 1, 0)
+			flash.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+			flash.BackgroundTransparency = 0.2
+			flash.BorderSizePixel = 0
+			flash.ZIndex = 100
+			flash.Parent = effectsGui
+
+			-- Big milestone title
+			local milestoneText = Instance.new("TextLabel")
+			milestoneText.Size = UDim2.new(1, 0, 0, 80)
+			milestoneText.Position = UDim2.new(0, 0, 0.3, 0)
+			milestoneText.BackgroundTransparency = 1
+			milestoneText.Text = "MILESTONE: " .. milestoneName .. "!"
+			milestoneText.TextColor3 = Color3.fromRGB(255, 215, 0)
+			milestoneText.TextSize = 52
+			milestoneText.Font = Enum.Font.GothamBold
+			milestoneText.TextStrokeTransparency = 0
+			milestoneText.TextStrokeColor3 = Color3.fromRGB(80, 50, 0)
+			milestoneText.ZIndex = 101
+			milestoneText.Parent = effectsGui
+
+			-- Bonus text
+			local bonusText = Instance.new("TextLabel")
+			bonusText.Size = UDim2.new(1, 0, 0, 50)
+			bonusText.Position = UDim2.new(0, 0, 0.42, 0)
+			bonusText.BackgroundTransparency = 1
+			bonusText.Text = "+$" .. Utils.formatCash(bonus) .. " BONUS!"
+			bonusText.TextColor3 = Color3.fromRGB(100, 255, 100)
+			bonusText.TextSize = 36
+			bonusText.Font = Enum.Font.GothamBold
+			bonusText.TextStrokeTransparency = 0
+			bonusText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+			bonusText.ZIndex = 101
+			bonusText.Parent = effectsGui
+
+			-- Confetti burst
+			if _G.ShowConfetti then
+				_G.ShowConfetti()
+				task.delay(0.5, function()
+					if _G.ShowConfetti then _G.ShowConfetti() end
+				end)
+			end
+
+			-- Fade out flash and text
+			local tweenInfo = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			TweenService:Create(flash, tweenInfo, {BackgroundTransparency = 1}):Play()
+			TweenService:Create(milestoneText, tweenInfo, {
+				TextTransparency = 1,
+				TextStrokeTransparency = 1,
+				Position = UDim2.new(0, 0, 0.2, 0),
+			}):Play()
+			TweenService:Create(bonusText, tweenInfo, {
+				TextTransparency = 1,
+				TextStrokeTransparency = 1,
+				Position = UDim2.new(0, 0, 0.35, 0),
+			}):Play()
+
+			task.delay(3.5, function()
+				flash:Destroy()
+				milestoneText:Destroy()
+				bonusText:Destroy()
+			end)
+		end)
+	end
+end)
+
 -- Achievement banner
 task.spawn(function()
 	local AchievementUnlocked = Remotes:WaitForChild("AchievementUnlocked", 10)

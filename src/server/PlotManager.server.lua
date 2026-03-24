@@ -239,6 +239,65 @@ local function createLobby()
 	waterEffect.Drag = 2
 	waterEffect.Parent = column
 
+	-- Player count / server info sign (to the right of the title sign)
+	local infoSign = Instance.new("Part")
+	infoSign.Name = "InfoSign"
+	infoSign.Size = Vector3.new(12, 8, 2)
+	infoSign.Position = Vector3.new(35, 7, -30)
+	infoSign.Anchored = true
+	infoSign.Color = Color3.fromRGB(25, 25, 40)
+	infoSign.Material = Enum.Material.SmoothPlastic
+	infoSign.Parent = lobbyFolder
+
+	local infoGui = Instance.new("SurfaceGui")
+	infoGui.Face = Enum.NormalId.Front
+	infoGui.Parent = infoSign
+
+	local infoTitle = Instance.new("TextLabel")
+	infoTitle.Name = "InfoTitle"
+	infoTitle.Size = UDim2.new(1, 0, 0.3, 0)
+	infoTitle.Position = UDim2.new(0, 0, 0, 0)
+	infoTitle.BackgroundTransparency = 1
+	infoTitle.Text = "SERVER INFO"
+	infoTitle.TextColor3 = Color3.fromRGB(255, 215, 0)
+	infoTitle.TextScaled = true
+	infoTitle.Font = Enum.Font.GothamBold
+	infoTitle.Parent = infoGui
+
+	local playerCount = Instance.new("TextLabel")
+	playerCount.Name = "PlayerCount"
+	playerCount.Size = UDim2.new(1, 0, 0.35, 0)
+	playerCount.Position = UDim2.new(0, 0, 0.3, 0)
+	playerCount.BackgroundTransparency = 1
+	playerCount.Text = "Players: 0/" .. GameConfig.MaxPlots
+	playerCount.TextColor3 = Color3.fromRGB(255, 255, 255)
+	playerCount.TextScaled = true
+	playerCount.Font = Enum.Font.GothamBold
+	playerCount.Parent = infoGui
+
+	local crossPromo = Instance.new("TextLabel")
+	crossPromo.Name = "CrossPromo"
+	crossPromo.Size = UDim2.new(1, 0, 0.3, 0)
+	crossPromo.Position = UDim2.new(0, 0, 0.7, 0)
+	crossPromo.BackgroundTransparency = 1
+	crossPromo.Text = "JOIN OUR GAMES!\nTry Galaxy Empire, Food Factory, Tower of Chaos!"
+	crossPromo.TextColor3 = Color3.fromRGB(180, 180, 180)
+	crossPromo.TextScaled = true
+	crossPromo.Font = Enum.Font.Gotham
+	crossPromo.Parent = infoGui
+
+	-- Back face clone
+	local infoGuiBack = Instance.new("SurfaceGui")
+	infoGuiBack.Face = Enum.NormalId.Back
+	infoGuiBack.Parent = infoSign
+
+	local backInfoTitle = infoTitle:Clone()
+	backInfoTitle.Parent = infoGuiBack
+	local backPlayerCount = playerCount:Clone()
+	backPlayerCount.Parent = infoGuiBack
+	local backCrossPromo = crossPromo:Clone()
+	backCrossPromo.Parent = infoGuiBack
+
 	return lobbyFolder
 end
 
@@ -1090,6 +1149,27 @@ end)
 
 -- Create the lobby
 createLobby()
+
+-- Update player count on info sign every 5 seconds
+task.spawn(function()
+	while true do
+		task.wait(5)
+		local lobby = workspace:FindFirstChild("Lobby")
+		if lobby then
+			local sign = lobby:FindFirstChild("InfoSign")
+			if sign then
+				for _, gui in ipairs(sign:GetChildren()) do
+					if gui:IsA("SurfaceGui") then
+						local pc = gui:FindFirstChild("PlayerCount")
+						if pc then
+							pc.Text = "Players: " .. #Players:GetPlayers() .. "/" .. GameConfig.MaxPlots
+						end
+					end
+				end
+			end
+		end
+	end
+end)
 
 -- Create all plots
 for i = 1, GameConfig.MaxPlots do

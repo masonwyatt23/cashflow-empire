@@ -32,6 +32,10 @@ local RebirthSuccessRemote = Instance.new("RemoteEvent")
 RebirthSuccessRemote.Name = "RebirthSuccess"
 RebirthSuccessRemote.Parent = Remotes
 
+local RebirthMilestoneRemote = Instance.new("RemoteEvent")
+RebirthMilestoneRemote.Name = "RebirthMilestone"
+RebirthMilestoneRemote.Parent = Remotes
+
 -- Perform rebirth
 function _G.DoRebirth(player, skipCostCheck)
 	local data = _G.GetPlayerData(player)
@@ -64,6 +68,25 @@ function _G.DoRebirth(player, skipCostCheck)
 
 	-- Send rebirth info
 	RebirthSuccessRemote:FireClient(player, data.rebirthCount)
+
+	-- Check rebirth milestones
+	local milestones = {
+		{count = 5,  name = "Rebirth Warrior",   bonus = 100000},
+		{count = 10, name = "Prestige Master",   bonus = 500000},
+		{count = 15, name = "Diamond Prestige",  bonus = 2000000},
+		{count = 20, name = "Legendary Status",  bonus = 10000000},
+		{count = 25, name = "MAX PRESTIGE!",     bonus = 50000000},
+	}
+	for _, ms in ipairs(milestones) do
+		if data.rebirthCount == ms.count then
+			if _G.AddCash then _G.AddCash(player, ms.bonus) end
+			if RebirthMilestoneRemote then
+				RebirthMilestoneRemote:FireClient(player, ms.name, ms.bonus, ms.count)
+			end
+			break
+		end
+	end
+
 	sendRebirthInfo(player)
 
 	-- Update leaderboard
