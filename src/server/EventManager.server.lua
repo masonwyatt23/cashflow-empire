@@ -35,6 +35,14 @@ function _G.EventActive(rewardType)
 	return false
 end
 
+-- Get active event info for other scripts (WelcomeBackManager, etc.)
+function _G.GetActiveEventInfo()
+	if activeEvent and os.time() < activeEventEndTime then
+		return {active = true, name = activeEvent.name}
+	end
+	return {active = false}
+end
+
 local function getUTCTimeInfo()
 	local utcTime = os.time()
 	local utcDate = os.date("!*t", utcTime)

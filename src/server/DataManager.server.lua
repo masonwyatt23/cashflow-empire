@@ -35,6 +35,9 @@ local DEFAULT_DATA = {
 	lastQuestReset = 0,
 	investments = {},
 	totalStockProfit = 0,
+	lastLoginTime = 0,
+	lastSpinTime = 0,
+	freeRebirthGranted = false,
 }
 
 -- Poll-wait helper: waits for a _G function to be registered by another script

@@ -286,6 +286,23 @@ local function createHUD()
 	tradeCorner.CornerRadius = UDim.new(0, 8)
 	tradeCorner.Parent = tradeButton
 
+	-- Spin button (next to trade)
+	local spinButton = Instance.new("TextButton")
+	spinButton.Name = "SpinButton"
+	spinButton.Size = UDim2.new(0, 80, 0, 45)
+	spinButton.Position = UDim2.new(0, 690, 1, -55)
+	spinButton.BackgroundColor3 = Color3.fromRGB(200, 50, 200)
+	spinButton.BorderSizePixel = 0
+	spinButton.Text = "SPIN"
+	spinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	spinButton.TextSize = 16
+	spinButton.Font = Enum.Font.GothamBold
+	spinButton.Parent = screenGui
+
+	local spinCorner = Instance.new("UICorner")
+	spinCorner.CornerRadius = UDim.new(0, 8)
+	spinCorner.Parent = spinButton
+
 	-- Progress bar (below Next Item panel)
 	local progressFrame = Instance.new("Frame")
 	progressFrame.Name = "ProgressBar"
@@ -514,6 +531,14 @@ hud.TradeButton.MouseButton1Click:Connect(function()
 	if _G.PlayButtonClick then _G.PlayButtonClick() end
 	if _G.ShowTradeUI then
 		_G.ShowTradeUI()
+	end
+end)
+
+-- Spin button
+hud.SpinButton.MouseButton1Click:Connect(function()
+	if _G.PlayButtonClick then _G.PlayButtonClick() end
+	if _G.ShowSpinWheel then
+		_G.ShowSpinWheel()
 	end
 end)
 
